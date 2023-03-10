@@ -44,4 +44,4 @@ Zig benchmark:
         aegis-256:      11529 MiB/s
 ```
 
-Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512.
+Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512. However, we may already be hitting memory bandwidth limits.
