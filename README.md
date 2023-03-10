@@ -6,7 +6,7 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
 
 AEGIS-128X has exceptional performance, even without AVX512.
 
-## Intel i9-13900k (thanks to @watzon) (AVX2 only)
+## Intel i9-13900k (thanks to @watzon)
 
 Zig benchmark:
 
@@ -24,7 +24,7 @@ OpenSSL 3 AES benchmarks on the same machine:
        aes128-gcm:       10243 MiB/s
 ```
 
-## Zig CI server - Ryzen 9 (AVX2 only)
+## Zig CI server - Ryzen 9
 
 Zig benchmark:
 
@@ -42,7 +42,7 @@ OpenSSL 3 AES benchmarks on the same machine:
        aes128-gcm:       4182 MiB/s
 ```
 
-## Scaleway Zen2 instance (AVX2 only)
+## Scaleway Zen2 instance
 
 Zig benchmark:
 
