@@ -6,7 +6,7 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
 
 AEGIS-128X has exceptional performance, even without AVX512.
 
-Zig benchmark results on a Scaleway Zen2 instance:
+Zig benchmark results on a Scaleway Zen2 instance (AVX2 only):
 
 ```
        aegis-128x:      29070 MiB/s
