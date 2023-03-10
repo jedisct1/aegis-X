@@ -4,7 +4,7 @@ AEGIS-128X is an experimental, parallel variant of the high performance authenti
 
 It is equivalent to evaluating multiple AEGIS-128L instances in parallel with different initial states.
 
-AEGIS-128X has exceptionnal performance, even without AVX512:
+AEGIS-128X has exceptional performance, even without AVX512.
 
 Zig benchmark results on a Scaleway Zen2 instance:
 
