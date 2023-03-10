@@ -6,6 +6,8 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
 
 AEGIS-128X has exceptional performance, even without AVX512.
 
+Results for a 2-way variant, requiring AVX2 only:
+
 ## Intel i9-13900k (thanks to @watzon)
 
 Zig benchmark:
