@@ -6,7 +6,9 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
 
 AEGIS-128X has exceptional performance, even without AVX512.
 
-Zig benchmark results on a Scaleway Zen2 instance (AVX2 only):
+## Scaleway Zen2 instance (AVX2 only)
+
+Zig benchmark:
 
 ```
        aegis-128x:      29070 MiB/s
@@ -14,11 +16,28 @@ Zig benchmark results on a Scaleway Zen2 instance (AVX2 only):
         aegis-256:       9066 MiB/s
 ```
 
-OpenSSL 3 AES-GCM benchmark on the same machine:
+OpenSSL 3 AES-OCB benchmarks on the same machine:
 
 ```
-       aes128-gcm:       8772 MiB/s
-       aes256-gcm:       7483 MiB/s
-```       
+       aes128-ocb:       8633 MiB/s
+       aes256-ocb:       5972 MiB/s
+```
+
+## Zig CI server - Ryzen 9 (AVX2 only)
+
+Zig benchmark:
+
+```
+       aegis-128x:      35642 MiB/s
+       aegis-128l:      19209 MiB/s
+        aegis-256:      11529 MiB/s
+```
+
+OpenSSL 3 AES-OCB benchmarks on the same machine:
+
+```
+       aes128-ocb:      11427 MiB/s
+       aes256-ocb:       7993 MiB/s
+```
 
 Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512.
