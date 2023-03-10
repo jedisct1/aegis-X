@@ -16,11 +16,12 @@ Zig benchmark:
         aegis-256:      12077 MiB/s
 ```
 
-OpenSSL 3 AES-OCB benchmarks on the same machine:
+OpenSSL 3 AES benchmarks on the same machine:
 
 ```
        aes128-ocb:       16013 MiB/s
        aes256-ocb:       11520 MiB/s
+       aes128-gcm:       10243 MiB/s
 ```
 
 ## Scaleway Zen2 instance (AVX2 only)
