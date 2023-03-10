@@ -14,4 +14,11 @@ Zig benchmark results on a Scaleway Zen2 instance (AVX2 only):
         aegis-256:       9066 MiB/s
 ```
 
+OpenSSL 3 AES-GCM benchmark on the same machine:
+
+```
+       aes128-gcm:       8772 MiB/s
+       aes256-gcm:       7483 MiB/s
+```       
+
 Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512.
