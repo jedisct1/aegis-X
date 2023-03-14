@@ -44,7 +44,7 @@ OpenSSL 3 AES benchmarks on the same machine:
        aes128-gcm:       4182 MiB/s
 ```
 
-## Scaleway Zen2 instance
+## Scaleway EPYC 7543 instance
 
 Zig benchmark:
 
