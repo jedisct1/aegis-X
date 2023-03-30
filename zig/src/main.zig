@@ -155,7 +155,10 @@ pub const Aegis128X = struct {
         const key_block = AesBlockX2.fromBytes(&key_x2);
         const nonce_block = AesBlockX2.fromBytes(&nonce_x2);
 
-        const x = c0.xorBlocks(AesBlockX2.fromBytes(&[_]u8{0x0} ** 15 ++ &[_]u8{0x01} ++ [_]u8{0x0} ** 15 ++ &[_]u8{0x02}));
+        const contexts = AesBlockX2.fromBytes(
+            &[_]u8{0x0} ** 15 ++ &[_]u8{0x01} ++
+                [_]u8{0x0} ** 15 ++ &[_]u8{0x02},
+        );
 
         var self = Aegis128X{ .s = State{
             key_block.xorBlocks(nonce_block),
@@ -165,7 +168,7 @@ pub const Aegis128X = struct {
             key_block.xorBlocks(nonce_block),
             key_block.xorBlocks(c0),
             key_block.xorBlocks(c1),
-            key_block.xorBlocks(x),
+            key_block.xorBlocks(c0.xorBlocks(contexts)),
         } };
         var i: usize = 0;
         while (i < 10) : (i += 1) {
@@ -234,7 +237,8 @@ pub const Aegis128X = struct {
         while (i < 7) : (i += 1) {
             self.update(t, t);
         }
-        const tag32 = s[0].xorBlocks(s[1]).xorBlocks(s[2]).xorBlocks(s[3]).xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[6]).toBytes();
+        const tag32 = s[0].xorBlocks(s[1]).xorBlocks(s[2]).xorBlocks(s[3])
+            .xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[6]).toBytes();
         var tag: [tag_length]u8 = undefined;
         for (tag, 0..) |_, j| {
             tag[j] = tag32[j] ^ tag32[j + 16];
