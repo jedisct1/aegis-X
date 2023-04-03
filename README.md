@@ -154,7 +154,40 @@ c = C[0][0] ‖ C[1][0] ‖ C[2][0] ‖ C[p-1][0] ‖
 Finally, the AEGIS-128X authentication tag is the addition of the independent authentication tags:
 
 ```
-t = T[0] ^ T[1] ^ T[2] … T[p-1]
+t = T[0] ^ T[1] ^ T[2] … ^ T[p-1]
 ```
 
 Note that AEGIS-128L is just a specific instance of AEGIS-128X with `p=1`.
+
+### Implementation
+
+An AEGIS-128L state is represented as eight AES blocks, individually represented as the type `AesBlock`:
+
+```
+State128L: [8]AesBlock
+```
+
+In AEGIS-128X, we can consider vectors of `p` AES blocks:
+
+```
+AesBlockXp: [p]AesBlock
+```
+
+An `AesBlockXP` can be efficiently stored in a 256-bit or 512-bit register.
+
+The AEGIS-128X state only differs from the AEGIS-128L by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
+
+```
+State128X: [8]AesBlockXp
+```
+
+AEGIS-128X applies the exact same operations as AEGIS-128L, to every member of the vector instead of single blocks.
+
+This is equivalent to multiple AEGIS-128L evaluations.
+
+In practice, `p` can only be `1`, `2` or `4`, so implementations don't have to be generic.
+
+On CPUs that don't implement vectorized versions of the AES core permutation, AEGIS-128X can be implemented in two different ways:
+
+1) by emulating AES block vectors. This is the easiest option, keeping the code close to hardware-accelerated versions.
+2) by evaluating `A[0], A[1], A[2], … A[p-1]` and `C[0], C[1], C[2], … C[p-1]` sequentially, with periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
