@@ -1,9 +1,5 @@
 # AEGIS-128X
 
-AEGIS-128X is an experimental, parallel variant of the high performance authenticated cipher AEGIS-128L, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
-
-It is equivalent to evaluating multiple AEGIS-128L instances in parallel with different initial states.
-
 - [AEGIS-128X](#aegis-128x)
 - [Benchmarks](#benchmarks)
     - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
@@ -15,6 +11,9 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
   - [Parallel encryption](#parallel-encryption)
   - [Implementation notes](#implementation-notes)
 
+AEGIS-128X is an experimental, parallel variant of the high performance authenticated cipher AEGIS-128L, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
+
+It is equivalent to evaluating multiple AEGIS-128L instances in parallel with different initial states.
 
 # Benchmarks
 
