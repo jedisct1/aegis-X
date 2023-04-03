@@ -1,120 +1,9 @@
 const std = @import("std");
 const assert = std.debug.assert;
-const builtin = @import("builtin");
-const crypto = std.crypto;
 const mem = std.mem;
 const AuthenticationError = std.crypto.errors.AuthenticationError;
 
-const has_vaes = std.Target.x86.featureSetHas(builtin.cpu.features, .vaes);
-const AesBlockX2 = if (builtin.cpu.arch == .x86_64 and has_vaes) IntelAesBlockX2 else GenericAesBlockX2;
-
-pub const IntelAesBlockX2 = struct {
-    const Self = @This();
-    const BlockVec = @Vector(4, u64);
-    repr: BlockVec,
-
-    pub inline fn fromBytes(bytes: *const [32]u8) Self {
-        const repr = mem.bytesToValue(BlockVec, bytes);
-        return Self{ .repr = repr };
-    }
-
-    pub inline fn toBytes(block: Self) [32]u8 {
-        return mem.toBytes(block.repr);
-    }
-
-    pub inline fn xorBytes(block: Self, bytes: *const [32]u8) [32]u8 {
-        const x = block.repr ^ fromBytes(bytes).repr;
-        return mem.toBytes(x);
-    }
-
-    pub inline fn encrypt(block: Self, round_key: Self) Self {
-        return Self{
-            .repr = asm (
-                \\ vaesenc %[rk], %[in], %[out]
-                : [out] "=x" (-> BlockVec),
-                : [in] "x" (block.repr),
-                  [rk] "x" (round_key.repr),
-            ),
-        };
-    }
-
-    pub inline fn xorBlocks(block1: Self, block2: Self) Self {
-        return Self{ .repr = block1.repr ^ block2.repr };
-    }
-
-    pub inline fn andBlocks(block1: Self, block2: Self) Self {
-        return Self{ .repr = block1.repr & block2.repr };
-    }
-
-    pub inline fn orBlocks(block1: Self, block2: Self) Self {
-        return Self{ .repr = block1.repr | block2.repr };
-    }
-};
-
-pub const GenericAesBlockX2 = struct {
-    const Self = @This();
-    const BlockVec = crypto.core.aes.Block;
-    repr: [2]BlockVec,
-
-    pub inline fn fromBytes(bytes: *const [32]u8) Self {
-        return Self{ .repr = .{
-            BlockVec.fromBytes(bytes[0..16]),
-            BlockVec.fromBytes(bytes[16..32]),
-        } };
-    }
-
-    pub inline fn toBytes(block: Self) [32]u8 {
-        var out: [32]u8 = undefined;
-        mem.copy(u8, out[0..16], &block.repr[0].toBytes());
-        mem.copy(u8, out[16..32], &block.repr[1].toBytes());
-        return out;
-    }
-
-    pub inline fn xorBytes(block: Self, bytes: *const [32]u8) [32]u8 {
-        return BlockVec{
-            .repr = .{
-                block.repr[0].xorBytes(bytes[0..16]),
-                block.repr[1].xorBytes(bytes[16..32]),
-            },
-        };
-    }
-
-    pub inline fn encrypt(block: Self, round_key: Self) Self {
-        return Self{
-            .repr = .{
-                block.repr[0].encrypt(round_key.repr[0]),
-                block.repr[1].encrypt(round_key.repr[1]),
-            },
-        };
-    }
-
-    pub inline fn xorBlocks(block1: Self, block2: Self) Self {
-        return Self{
-            .repr = .{
-                block1.repr[0].xorBlocks(block2.repr[0]),
-                block1.repr[1].xorBlocks(block2.repr[1]),
-            },
-        };
-    }
-
-    pub inline fn andBlocks(block1: Self, block2: Self) Self {
-        return Self{
-            .repr = .{
-                block1.repr[0].andBlocks(block2.repr[0]),
-                block1.repr[1].andBlocks(block2.repr[1]),
-            },
-        };
-    }
-
-    pub inline fn orBlocks(block1: Self, block2: Self) Self {
-        return Self{
-            .repr = .{
-                block1.repr[0].orBlocks(block2.repr[0]),
-                block1.repr[1].orBlocks(block2.repr[1]),
-            },
-        };
-    }
-};
+const AesBlockX2 = @import("aes_block_x2.zig").AesBlockX2;
 
 pub const Aegis128X = struct {
     pub const key_length: usize = 16;
@@ -156,15 +45,15 @@ pub const Aegis128X = struct {
         const nonce_block = AesBlockX2.fromBytes(&nonce_x2);
 
         const contexts = AesBlockX2.fromBytes(
-            &[_]u8{0x00} ** 15 ++ &[_]u8{0x00} ++ // context for first instance is 0x00
-                [_]u8{0x00} ** 15 ++ &[_]u8{0x01}, // context for second instance is 0x01
+            &[_]u8{0x00} ** 15 ++ [_]u8{0x00} ++ // context for first instance is 0x00
+                [_]u8{0x00} ** 15 ++ [_]u8{0x01}, // context for second instance is 0x01
         );
 
         var self = Aegis128X{ .s = State{
             key_block.xorBlocks(nonce_block),
             c1,
             c0,
-            c1,
+            c1.xorBlocks(contexts),
             key_block.xorBlocks(nonce_block),
             key_block.xorBlocks(c0),
             key_block.xorBlocks(c1),
@@ -319,3 +208,15 @@ pub const Aegis128X = struct {
         }
     }
 };
+
+test "aegis128x" {
+    const key = [_]u8{0} ** Aegis128X.key_length;
+    const nonce = [_]u8{0} ** Aegis128X.nonce_length;
+    const ad = [_]u8{0} ** 64;
+    const msg = [_]u8{0} ** 64;
+    var ct = [_]u8{0} ** msg.len;
+    const tag = Aegis128X.encrypt(&ct, &msg, &ad, key, nonce);
+    var msg2 = [_]u8{0} ** msg.len;
+    try Aegis128X.decrypt(&msg2, &ct, tag, &ad, key, nonce);
+    try std.testing.expectEqualSlices(u8, &msg, &msg2);
+}
