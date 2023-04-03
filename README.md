@@ -4,11 +4,25 @@ AEGIS-128X is an experimental, parallel variant of the high performance authenti
 
 It is equivalent to evaluating multiple AEGIS-128L instances in parallel with different initial states.
 
+- [AEGIS-128X](#aegis-128x)
+- [Benchmarks](#benchmarks)
+    - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
+  - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
+  - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
+- [The AEGIS-128X construction](#the-aegis-128x-construction)
+  - [Definitions](#definitions)
+  - [Context seperation](#context-seperation)
+  - [Parallel encryption](#parallel-encryption)
+  - [Implementation notes](#implementation-notes)
+
+
+# Benchmarks
+
 AEGIS-128X has exceptional performance, even without AVX512.
 
 Results for a 2-way variant, requiring AVX2 only:
 
-## Intel i9-13900k (thanks to @watzon)
+### Intel i9-13900k (thanks to @watzon)
 
 Zig benchmark:
 
@@ -66,9 +80,9 @@ Given that the `AESENC` instruction has the same latency/throughput regardless o
 
 However, we may already be hitting memory bandwidth limits.
 
-## The AEGIS-128X construction
+# The AEGIS-128X construction
 
-### Definitions
+## Definitions
 
 - `ctx`: context separator
 - `k`: encryption key
@@ -80,7 +94,7 @@ However, we may already be hitting memory bandwidth limits.
 - `t`: authentication tag
 - `c0`, `c1`: AEGIS constants
 
-### Context seperation
+## Context seperation
 
 AEGIS-128X evaluates `p` context-separated instances of AEGIS-128L.
 
@@ -110,7 +124,7 @@ The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trail
 
 Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally defined, without a context.
 
-### Parallel encryption
+## Parallel encryption
 
 AEGIS-128L absorbs the associated data and message with a 256-bit rate `r`.
 
@@ -159,7 +173,7 @@ t = T[0] ^ T[1] ^ T[2] … ^ T[p-1]
 
 Note that AEGIS-128L is just a specific instance of AEGIS-128X with `p=1`.
 
-### Implementation
+## Implementation notes
 
 An AEGIS-128L state is represented as eight AES blocks, individually represented as the type `AesBlock`:
 
