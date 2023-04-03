@@ -45,8 +45,8 @@ pub const Aegis128X = struct {
         const nonce_block = AesBlockX2.fromBytes(&nonce_x2);
 
         const contexts = AesBlockX2.fromBytes(
-            &[_]u8{0x00} ** 15 ++ [_]u8{0x00} ++ // context for first instance is 0x00
-                [_]u8{0x00} ** 15 ++ [_]u8{0x01}, // context for second instance is 0x01
+            &[_]u8{0} ++ [_]u8{0} ** 15 ++ // context for first instance is 0
+                [_]u8{1} ++ [_]u8{0} ** 15, // context for second instance is 1
         );
 
         var self = Aegis128X{ .s = State{
