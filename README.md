@@ -99,7 +99,7 @@ AEGIS-128L defines the initial state as eight AES blocks set to:
 | 6     | k ^ c1        |
 | 7     | k ^ c0        |
 
-We then add the context to that state:
+We add the context to that state:
 
 ```
 block[3] = block[3] ^ ZeroPad(ctx)
@@ -108,7 +108,7 @@ block[7] = block[7] ^ ZeroPad(ctx)
 
 The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trailing zeros to `ctx` in order to match the AES block size.
 
-Note that when `ctx = 0`, the initial state is exactly the same as context-less AEGIS-128L.
+Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally defined, without a context.
 
 ### Parallel encryption
 
