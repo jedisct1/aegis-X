@@ -6,7 +6,7 @@
   - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
   - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
 - [The AEGIS-128X construction](#the-aegis-128x-construction)
-  - [Definitions](#definitions)
+  - [Notations](#notations)
   - [Context separation](#context-separation)
   - [Parallel processing](#parallel-processing)
   - [Implementation notes](#implementation-notes)
@@ -82,7 +82,7 @@ However, we may already be hitting memory bandwidth limits.
 
 # The AEGIS-128X construction
 
-## Definitions
+## Notations
 
 - `ctx`: context separator
 - `k`: encryption key
@@ -241,7 +241,7 @@ Note that `p` is expected to be a hyperparameter, that an adversary cannot have 
 
 The main concern with the same key and nonce pair used in different contexts are differential attacks.
 
-In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, exceeding the AES-128 security margin.
+In AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, which is considered sufficient to prevent differential attacks.
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit nonces are absorbed in AEGIS-128L.
 
