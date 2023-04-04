@@ -12,7 +12,7 @@
   - [Implementation notes](#implementation-notes)
   - [Security](#security)
 
-AEGIS-128X is an experimental, parallel variant of the high performance authenticated cipher AEGIS-128L, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
+AEGIS-128X is a proposed variant of the high performance authenticated cipher AEGIS-128L, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
 
 It is equivalent to evaluating multiple AEGIS-128L instances in parallel with different initial states.
 
