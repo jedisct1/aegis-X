@@ -235,7 +235,7 @@ In the proposed tweak to the initialization function, the context is added to th
 The purpose of the constants `c0` and `c1` (simply derived the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
 Given its limited range, adding `p` cannot turn them into weak constants, and doesn't alter any of the AEGIS-128L properties.
-In addition, `p` is expected to be a hyperparameter, that an adversary cannot have control of.
+Note that `p` is expected to be a hyperparameter, that an adversary cannot have control of.
 
 The main concern with the same key and nonce pair used in different contexts are differential attacks.
 
