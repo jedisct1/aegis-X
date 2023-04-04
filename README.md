@@ -136,7 +136,9 @@ Input message message `m` is split into `r`-bit blocks:
 { m[0], m[1], m[2], … }
 ```
 
-These blocks are interleaved to produce `p` independent messages `{ M[0], M[1], M[2], … M[p-1] }`:
+The last block is zero-padded to `r * p` bits.
+
+These blocks are interleaved to produce `p` independent `|m|/p` bit messages `{ M[0], M[1], M[2], … M[p-1] }`:
 
 ```
 M[0]   ← m[0]   ‖ m[p]       ‖ m[2p]       ‖ m[3p] …
