@@ -128,9 +128,9 @@ Note that when `ctx = 0`, the resulting state is exactly the same as AEGIS-128L,
 
 AEGIS-128L absorbs the associated data and message with a 256-bit rate `r`.
 
-In AEGIS-128X, the associated data and message are distributed in interleaved blocks of size `B = r * p` bits as they arrive.
+In AEGIS-128X, the associated data and message are distributed in interleaved blocks with a stride of `B = r * p` bits as they arrive.
 
-Given a padded input message `m`, considered as a sequence of `r`-bit blocks:
+Input message message `m` is split into `r`-bit blocks:
 
 ```
 { m[0], m[1], m[2], … }
@@ -146,7 +146,7 @@ M[2]   ← m[2r]     ‖ m[B+2r]     ‖ m[2B+2r]     ‖ m[3B+2r] …
 M[p-1] ← m[(p-1)r] ‖ m[B+(p-1)r] ‖ m[2B+(p-1)r] ‖ m[3B+(p-1)r] …
 ```
 
-The exact same distribution method is applied to the associated data in order to produce `{ A[0], A[1], A[2], … A[p-1] }`.
+Associated data is split into `p` parts the same way to produce `{ A[0], A[1], A[2], … A[p-1] }`.
 
 AEGIS-128X then encrypts these inputs independently, producing `p` ciphertexts `C` and authentication tags `T`:
 
