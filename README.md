@@ -241,7 +241,7 @@ Note that `p` is expected to be a hyperparameter, that an adversary cannot have 
 
 The main concern with the same key and nonce pair used in different contexts are differential attacks.
 
-In AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, which is considered sufficient to prevent differential attacks.
+In AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. Shiraya at al. showed that the initialization phase of AEGIS-128L is [secure against differential attacks after 3 update steps](https://doi.org/10.1049/ise2.12109).
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit nonces are absorbed in AEGIS-128L.
 
