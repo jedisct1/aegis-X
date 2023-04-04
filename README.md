@@ -116,8 +116,8 @@ AEGIS-128L defines the initial state as eight AES blocks set to:
 We add the context to that state:
 
 ```
-block[3] = block[3] ^ ZeroPad(ctx)
-block[7] = block[7] ^ ZeroPad(ctx)
+block[3] ← block[3] ^ ZeroPad(ctx)
+block[7] ← block[7] ^ ZeroPad(ctx)
 ```
 
 The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trailing zeros to `ctx` in order to match the AES block size.
@@ -133,16 +133,16 @@ In AEGIS-128X, the associated data and message are distributed in interleaved bl
 Given input message `m`, considered as a sequence of `r`-bit blocks:
 
 ```
-m = { m[0], m[1], m[2], … }
+m ← { m[0], m[1], m[2], … }
 ```
 
 These blocks are interleaved to produce `p` independent messages `{ M[0], M[1], M[2], … M[p-1] }`:
 
 ```
-M[0]   = m[0]      ‖ m[B]        ‖ m[2B]        ‖ m[3B] …
-M[1]   = m[r]      ‖ m[B+r]      ‖ m[2B+r]      ‖ m[3B+r] …
-M[2]   = m[2r]     ‖ m[B+2r]     ‖ m[2B+2r]     ‖ m[3B+2r] …
-M[p-1] = m[(p-1)r] ‖ m[B+(p-1)r] ‖ m[2B+(p-1)r] ‖ m[3B+(p-1)r] …
+M[0]   ← m[0]      ‖ m[B]        ‖ m[2B]        ‖ m[3B] …
+M[1]   ← m[r]      ‖ m[B+r]      ‖ m[2B+r]      ‖ m[3B+r] …
+M[2]   ← m[2r]     ‖ m[B+2r]     ‖ m[2B+2r]     ‖ m[3B+2r] …
+M[p-1] ← m[(p-1)r] ‖ m[B+(p-1)r] ‖ m[2B+(p-1)r] ‖ m[3B+(p-1)r] …
 ```
 
 The exact same distribution method is applied to the associated data in order to produce `{ A[0], A[1], A[2], … A[p-1] }`.
@@ -150,17 +150,17 @@ The exact same distribution method is applied to the associated data in order to
 AEGIS-128X then encrypts these inputs independently, producing `p` ciphertexts `C` and authentication tags `T`:
 
 ```
-C[0], T[0]     = AEGIS-128L(ctx=0,   k, n, A[0],   M[0])
-C[1], T[1]     = AEGIS-128L(ctx=1,   k, n, A[1],   M[1])
-C[2], T[2]     = AEGIS-128L(ctx=2,   k, n, A[2],   M[2])
+C[0], T[0]     ← AEGIS-128L(ctx←0,   k, n, A[0],   M[0])
+C[1], T[1]     ← AEGIS-128L(ctx←1,   k, n, A[1],   M[1])
+C[2], T[2]     ← AEGIS-128L(ctx←2,   k, n, A[2],   M[2])
 …
-C[p-1], T[p-1] = AEGIS-128L(ctx=p-1, k, n, A[p-1], M[p-1])
+C[p-1], T[p-1] ← AEGIS-128L(ctx←p-1, k, n, A[p-1], M[p-1])
 ```
 
 `{ C[0], C[1], C[2], … C[p-1] }` are de-interleaved to produce the AEGIS-128X ciphertext:
 
 ```
-c = C[0][0] ‖ C[1][0] ‖ C[2][0] … ‖ C[p-1][0] ‖
+c ← C[0][0] ‖ C[1][0] ‖ C[2][0] … ‖ C[p-1][0] ‖
     C[0][1] ‖ C[1][1] ‖ C[2][1] … ‖ C[p-1][1] ‖
     C[0][2] ‖ C[1][2] ‖ C[2][2] … ‖ C[p-1][2] ‖
     …
@@ -169,7 +169,7 @@ c = C[0][0] ‖ C[1][0] ‖ C[2][0] … ‖ C[p-1][0] ‖
 Finally, the AEGIS-128X authentication tag is the addition of the independent authentication tags:
 
 ```
-t = T[0] ^ T[1] ^ T[2] … ^ T[p-1]
+t ← T[0] ^ T[1] ^ T[2] … ^ T[p-1]
 ```
 
 Note that AEGIS-128L is just a specific instance of AEGIS-128X with `p=1`.
