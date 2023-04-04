@@ -222,17 +222,17 @@ In order to satisfy the AEGIS-128L contract, we should either derive distinct ke
 
 `p` is limited by the hardware, and guaranteed to be small. On general purpose CPUs, the context cannot exceed `3`.
 
-We could limit the AEGIS-128X nonce size to 126 bits (instead of 128 for AEGIS-128L), encoding the context in the remaining 2 bits to create the nonce used by the underlying AEGIS-128L functions.
+We could limit the AEGIS-128X nonce size to `128-log(p)` bits (instead of 128 for AEGIS-128L), encoding the context in the remaining bits to create the nonce used by the underlying AEGIS-128L functions.
 
 That would be effectively AEGIS-128L, evaluated with independent messages, and distinct key and nonce pairs.
 
-However, from an application perspective, 126-bit nonces would be unusual, and at odds with AEGIS-128L.
+However, from an application perspective, `128-log(p)` bit nonces would be unusual, and at odds with AEGIS-128L.
 
-Ideally, we'd like AEGIS-128L to internally support `128+log(p)`-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances.
+Ideally, we'd like AEGIS-128L to internally support `128+log(p)`-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances. To put it differently, we need to introduce a context with the same differential properties as the nonce.
 
 In the proposed tweak to the initialization function, the context is added to the constants in blocks 3 and 7 of the initial state.
 
-The purpose of the constants `c0` and `c1` (simply derived from the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
+The purpose of the constants (simply derived from the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
 Given its limited range, adding `p` cannot turn them into weak constants, and doesn't alter any of the AEGIS-128L properties.
 Note that `p` is expected to be a hyperparameter, that an adversary cannot have control of.
