@@ -122,7 +122,7 @@ block[7] = block[7] ^ ZeroPad(ctx)
 
 The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trailing zeros to `ctx` in order to match the AES block size.
 
-Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally defined, without a context.
+Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally specified, without a context.
 
 ## Parallel processing
 
@@ -232,7 +232,7 @@ Ideally, we'd like AEGIS-128L to internally support 130-bit nonces: AEGIS-128X a
 
 In the proposed tweak to the initialization function, the context is added to the constants used of blocks 3 and 7.
 
-The purpose of the constants `c0` and `c1` (defined as the Fibonacci sequence mod 256) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
+The purpose of the constants `c0` and `c1` (simply derived the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
 Given its limited range, adding `p` cannot turn them into weak constants, and doesn't alter any of the AEGIS-128L properties.
 In addition, `p` is expected to be a hyperparameter, that an adversary cannot have control of.
