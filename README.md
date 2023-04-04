@@ -233,7 +233,7 @@ Ideally, we'd like AEGIS-128L to internally support 130-bit nonces: AEGIS-128X a
 
 In the proposed tweak to the initialization function, the context is added to the constants of blocks 3 and 7.
 
-The purpose of the constants `c0` and `c1` (simply derived the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
+The purpose of the constants `c0` and `c1` (simply derived from the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
 Given its limited range, adding `p` cannot turn them into weak constants, and doesn't alter any of the AEGIS-128L properties.
 Note that `p` is expected to be a hyperparameter, that an adversary cannot have control of.
