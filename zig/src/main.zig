@@ -1,5 +1,6 @@
 const std = @import("std");
 const assert = std.debug.assert;
+const crypto = std.crypto;
 const mem = std.mem;
 const AuthenticationError = std.crypto.errors.AuthenticationError;
 
@@ -53,14 +54,16 @@ pub const Aegis128X = struct {
             key_block.xorBlocks(nonce_block),
             c1,
             c0,
-            c1.xorBlocks(contexts),
+            c1,
             key_block.xorBlocks(nonce_block),
             key_block.xorBlocks(c0),
             key_block.xorBlocks(c1),
-            key_block.xorBlocks(c0.xorBlocks(contexts)),
+            key_block.xorBlocks(c0),
         } };
         var i: usize = 0;
         while (i < 10) : (i += 1) {
+            self.s[3] = self.s[3].xorBlocks(contexts);
+            self.s[7] = self.s[7].xorBlocks(contexts);
             self.update(nonce_block, key_block);
         }
         return self;

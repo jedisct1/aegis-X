@@ -113,7 +113,7 @@ AEGIS-128L defines the initial state as eight AES blocks set to:
 | 6     | k ^ c1        |
 | 7     | k ^ c0        |
 
-We add the context to that state:
+The AEGIS-128L initialization function performs 10 state updates. Before each update, we add the context to the state:
 
 ```
 block[3] ← block[3] ^ ZeroPad(ctx)
@@ -122,7 +122,7 @@ block[7] ← block[7] ^ ZeroPad(ctx)
 
 The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trailing zeros to `ctx` in order to match the AES block size.
 
-Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally specified, without a context.
+Note that when `ctx = 0`, the resulting state is exactly the same as AEGIS-128L, as originally specified, without a context.
 
 ## Parallel processing
 
@@ -241,6 +241,8 @@ Note that `p` is expected to be a hyperparameter, that an adversary cannot have 
 The main concern with the same key and nonce pair used in different contexts are differential attacks.
 
 In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, thus exceeding the AES-128 security margin.
+
+Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit nonces are absorbed in AEGIS-128L.
 
 128+2 bit nonces are thus unlikely to invalidate any of the current AEGIS-128L security claims.
 
