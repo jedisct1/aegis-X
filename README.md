@@ -178,6 +178,8 @@ Note that AEGIS-128L is just a specific instance of AEGIS-128X with `p=1`.
 
 ## Implementation notes
 
+Implementing AEGIS-128X only requires minor modifications to an existing AEGIS-128L implementation.
+
 An AEGIS-128L state is represented as eight AES blocks, individually represented as the type `AesBlock`:
 
 ```
