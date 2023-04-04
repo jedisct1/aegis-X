@@ -8,8 +8,9 @@
 - [The AEGIS-128X construction](#the-aegis-128x-construction)
   - [Definitions](#definitions)
   - [Context seperation](#context-seperation)
-  - [Parallel encryption](#parallel-encryption)
+  - [Parallel processing](#parallel-processing)
   - [Implementation notes](#implementation-notes)
+  - [Security](#security)
 
 AEGIS-128X is an experimental, parallel variant of the high performance authenticated cipher AEGIS-128L, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
 
@@ -123,7 +124,7 @@ The `ZeroPad(ctx)` function, defined in the AEGIS-128L specification, adds trail
 
 Note that when `ctx = 0`, the initial state is exactly the same as AEGIS-128L, as originally defined, without a context.
 
-## Parallel encryption
+## Parallel processing
 
 AEGIS-128L absorbs the associated data and message with a 256-bit rate `r`.
 
@@ -152,6 +153,7 @@ AEGIS-128X then encrypts these inputs independently, producing `p` ciphertexts `
 C[0], T[0]     = AEGIS-128L(ctx=0,   k, n, A[0],   M[0])
 C[1], T[1]     = AEGIS-128L(ctx=1,   k, n, A[1],   M[1])
 C[2], T[2]     = AEGIS-128L(ctx=2,   k, n, A[2],   M[2])
+…
 C[p-1], T[p-1] = AEGIS-128L(ctx=p-1, k, n, A[p-1], M[p-1])
 ```
 
@@ -204,3 +206,41 @@ On CPUs that don't implement vectorized versions of the AES core permutation, AE
 
 1) by emulating AES block vectors. This is the easiest option, keeping the code close to hardware-accelerated versions.
 2) by evaluating `A[0], A[1], A[2], … A[p-1]` and `C[0], C[1], C[2], … C[p-1]` sequentially, with periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
+
+## Security
+
+The AEGIS-128L security claims have the following requirements:
+1. Each key should be generated uniformly at random.
+2. Each key and nonce pair should not be used to protect more than one message; and each key and nonce pair should not be used with two different tag sizes.
+3. If verification fails, the decrypted plaintext and the wrong authentication tag should not be given as output.
+
+AEGIS-128X has the same requirements.
+
+`AEGIS-128X(p, k, n, ad, m)` can be seen as `p` evaluations of AEGIS-128L, on `p` independent messages of length `|m|/p` bits.
+
+In order to satisfy the AEGIS-128L contract, we should either derive distinct keys for each of these messages, or use distinct nonces.
+
+`p` is guaranteed to be small: `1`, `2` or `4`.
+
+We could limit the AEGIS-128X nonce size to 126 bits (instead of 128 for AEGIS-128L), encoding the context in the remaining 2 bits to create the nonce used by the underlying AEGIS-128L functions.
+
+That would be effectively AEGIS-128L, used with independent messages, and distinct key and nonce pairs.
+
+However, from an application perspective, 126-bit nonces would be unusual, and at odds with AEGIS-128L.
+
+Ideally, we'd like AEGIS-128L to internally support 130-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances.
+
+In the proposed tweak to the initialization function, the context is added to the constants used of blocks 3 and 7.
+
+The purpose of the constants `c0` and `c1` (defined as the Fibonacci sequence mod 256) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
+
+Given its limited range, adding `p` cannot turn them into weak constants, and doesn't alter any of the AEGIS-128L properties.
+In addition, `p` is expected to be a hyperparameter, that an adversary cannot have control of.
+
+The main concern with the same key and nonce pair used in different contexts are differential attacks.
+
+In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, thus exceeding the AES-128 security margin.
+
+Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how regular 128-bit nonces are absorbed in AEGIS-128L.
+
+128+2 bit nonces are thus unlikely to invalidate any of the existing AEGIS-128L security claims.
