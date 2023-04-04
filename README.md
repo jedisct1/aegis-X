@@ -242,8 +242,6 @@ The main concern with the same key and nonce pair used in different contexts are
 
 In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization function. A difference in contexts passes through more than 10 AES round functions, thus exceeding the AES-128 security margin.
 
-Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how regular 128-bit nonces are absorbed in AEGIS-128L.
-
 128+2 bit nonces are thus unlikely to invalidate any of the current AEGIS-128L security claims.
 
 These security claims require a key and nonce pair not to be used with different tag sizes. Independently from context separation, the AEGIS-128X construction guarantees that internal AEGIS-128L evaluations will always share the same tag size.
