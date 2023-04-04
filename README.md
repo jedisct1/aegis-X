@@ -202,8 +202,6 @@ AEGIS-128X applies the exact same operation sequences as AEGIS-128L, to every me
 
 This is equivalent to evaluating mutiple independent AEGIS-128L instances.
 
-In practice, `p` can only be `1`, `2` or `4`, so implementations can be specialized if necessary.
-
 On CPUs that don't implement vectorized versions of the AES core permutation, AEGIS-128X can be implemented in two different ways:
 
 1) by emulating AES block vectors. This is the easiest option, keeping the code close to hardware-accelerated versions.
@@ -222,7 +220,7 @@ AEGIS-128X has the same requirements.
 
 In order to satisfy the AEGIS-128L contract, we should either derive distinct keys for each of these messages, or use distinct nonces.
 
-`p` is guaranteed to be small: `1`, `2` or `4`.
+`p` is limited by the hardware, and guaranteed to be small. On general purpose CPUs, the context cannot exceed `3`.
 
 We could limit the AEGIS-128X nonce size to 126 bits (instead of 128 for AEGIS-128L), encoding the context in the remaining 2 bits to create the nonce used by the underlying AEGIS-128L functions.
 
@@ -230,9 +228,9 @@ That would be effectively AEGIS-128L, evaluated with independent messages, and d
 
 However, from an application perspective, 126-bit nonces would be unusual, and at odds with AEGIS-128L.
 
-Ideally, we'd like AEGIS-128L to internally support 130-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances.
+Ideally, we'd like AEGIS-128L to internally support `128+log(p)`-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances.
 
-In the proposed tweak to the initialization function, the context is added to the constants of blocks 3 and 7.
+In the proposed tweak to the initialization function, the context is added to the constants in blocks 3 and 7 of the initial state.
 
 The purpose of the constants `c0` and `c1` (simply derived from the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
@@ -245,7 +243,7 @@ In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit nonces are absorbed in AEGIS-128L.
 
-128+2 bit nonces are thus unlikely to invalidate any of the current AEGIS-128L security claims.
+The addition of a short context is thus unlikely to invalidate any of the current AEGIS-128L security claims.
 
 These security claims require a key and nonce pair not to be used with different tag sizes. Independently from context separation, the AEGIS-128X construction guarantees that internal AEGIS-128L evaluations will always share the same tag size.
 
