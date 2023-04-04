@@ -7,7 +7,7 @@
   - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
 - [The AEGIS-128X construction](#the-aegis-128x-construction)
   - [Definitions](#definitions)
-  - [Context seperation](#context-seperation)
+  - [Context separation](#context-separation)
   - [Parallel processing](#parallel-processing)
   - [Implementation notes](#implementation-notes)
   - [Security](#security)
@@ -94,7 +94,7 @@ However, we may already be hitting memory bandwidth limits.
 - `t`: authentication tag
 - `c0`, `c1`: AEGIS constants
 
-## Context seperation
+## Context separation
 
 AEGIS-128X evaluates `p` context-separated instances of AEGIS-128L.
 
