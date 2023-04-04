@@ -243,4 +243,4 @@ In AEGIS-128L, there are 80 AES round functions (10 steps) in the initialization
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how regular 128-bit nonces are absorbed in AEGIS-128L.
 
-128+2 bit nonces are thus unlikely to invalidate any of the existing AEGIS-128L security claims.
+128+2 bit nonces are thus unlikely to invalidate any of the current AEGIS-128L security claims.
