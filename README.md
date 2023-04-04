@@ -160,13 +160,12 @@ C[2], T[2]     ← AEGIS-128L(ctx←2,   k, n, A[2],   M[2])
 C[p-1], T[p-1] ← AEGIS-128L(ctx←p-1, k, n, A[p-1], M[p-1])
 ```
 
-`{ C[0], C[1], C[2], … C[p-1] }` are de-interleaved to produce the AEGIS-128X ciphertext:
+`{ C[0], C[1], C[2], … C[p-1] }` are deinterleaved to produce the AEGIS-128X ciphertext:
 
 ```
-c ← C[0][0] ‖ C[1][0] ‖ C[2][0] … ‖ C[p-1][0] ‖
-    C[0][1] ‖ C[1][1] ‖ C[2][1] … ‖ C[p-1][1] ‖
-    C[0][2] ‖ C[1][2] ‖ C[2][2] … ‖ C[p-1][2] ‖
-    …
+c ← C[0][0] ‖ C[1][0] ‖ C[2][0] ‖ … ‖ C[p-1][0] ‖
+    C[0][1] ‖ C[1][1] ‖ C[2][1] ‖ … ‖ C[p-1][1] ‖
+    C[0][2] ‖ C[1][2] ‖ C[2][2] ‖ … ‖ C[p-1][2] ‖ …
 ```
 
 Finally, the AEGIS-128X authentication tag is the addition the AEGIS-128L authentication tags:
@@ -191,7 +190,7 @@ In AEGIS-128X, we can consider vectors of `p` AES blocks:
 AesBlockXp: [p]AesBlock
 ```
 
-An `AesBlockXP` can be efficiently stored in a 256-bit or 512-bit register.
+With proper hardware support, `AesBlockXP` can be efficiently stored in a 256-bit or 512-bit register.
 
 The AEGIS-128X state only differs from the AEGIS-128L by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
 
@@ -199,11 +198,11 @@ The AEGIS-128X state only differs from the AEGIS-128L by the fact that is uses 8
 State128X: [8]AesBlockXp
 ```
 
-AEGIS-128X applies the exact same operations as AEGIS-128L, to every member of the vector instead of single blocks.
+AEGIS-128X applies the exact same operation sequences as AEGIS-128L, to every member of the vector instead of single blocks.
 
-This is equivalent to multiple AEGIS-128L evaluations.
+This is equivalent to evaluating mutiple independent AEGIS-128L instances.
 
-In practice, `p` can only be `1`, `2` or `4`, so implementations don't have to be generic.
+In practice, `p` can only be `1`, `2` or `4`, so implementations can be specialized if necessary.
 
 On CPUs that don't implement vectorized versions of the AES core permutation, AEGIS-128X can be implemented in two different ways:
 
