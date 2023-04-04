@@ -225,7 +225,7 @@ In order to satisfy the AEGIS-128L contract, we should either derive distinct ke
 
 We could limit the AEGIS-128X nonce size to 126 bits (instead of 128 for AEGIS-128L), encoding the context in the remaining 2 bits to create the nonce used by the underlying AEGIS-128L functions.
 
-That would be effectively AEGIS-128L, used with independent messages, and distinct key and nonce pairs.
+That would be effectively AEGIS-128L, evaluated with independent messages, and distinct key and nonce pairs.
 
 However, from an application perspective, 126-bit nonces would be unusual, and at odds with AEGIS-128L.
 
