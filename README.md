@@ -231,7 +231,7 @@ However, from an application perspective, 126-bit nonces would be unusual, and a
 
 Ideally, we'd like AEGIS-128L to internally support 130-bit nonces: AEGIS-128X applications would use 128 bit nonces, but the context could still be encoded to separate the parallel AEGIS-128L instances.
 
-In the proposed tweak to the initialization function, the context is added to the constants used of blocks 3 and 7.
+In the proposed tweak to the initialization function, the context is added to the constants of blocks 3 and 7.
 
 The purpose of the constants `c0` and `c1` (simply derived the Fibonacci sequence) is to resist attacks exploiting the symmetry of the AES round function and of the overall AEGIS state.
 
