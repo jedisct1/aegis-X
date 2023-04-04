@@ -167,7 +167,7 @@ c ← C[0][0] ‖ C[1][0] ‖ C[2][0] … ‖ C[p-1][0] ‖
     …
 ```
 
-Finally, the AEGIS-128X authentication tag is the addition of the independent authentication tags:
+Finally, the AEGIS-128X authentication tag is the addition the AEGIS-128L authentication tags:
 
 ```
 t ← T[0] ^ T[1] ^ T[2] … ^ T[p-1]
