@@ -130,10 +130,10 @@ AEGIS-128L absorbs the associated data and message with a 256-bit rate `r`.
 
 In AEGIS-128X, the associated data and message are distributed in interleaved blocks of size `B = r * p` bits as they arrive.
 
-Given input message `m`, considered as a sequence of `r`-bit blocks:
+Given a padded input message `m`, considered as a sequence of `r`-bit blocks:
 
 ```
-m = { m[0], m[1], m[2], … }
+{ m[0], m[1], m[2], … }
 ```
 
 These blocks are interleaved to produce `p` independent messages `{ M[0], M[1], M[2], … M[p-1] }`:
