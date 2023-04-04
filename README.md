@@ -133,7 +133,7 @@ In AEGIS-128X, the associated data and message are distributed in interleaved bl
 Given input message `m`, considered as a sequence of `r`-bit blocks:
 
 ```
-m ← { m[0], m[1], m[2], … }
+m = { m[0], m[1], m[2], … }
 ```
 
 These blocks are interleaved to produce `p` independent messages `{ M[0], M[1], M[2], … M[p-1] }`:
