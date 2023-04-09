@@ -104,7 +104,7 @@ AEGIS-128L defines the initial state as eight AES blocks set to:
 
 | block | initial value |
 | ----- | ------------- |
-| 0     | k             |
+| 0     | k ^ n         |
 | 1     | c1            |
 | 2     | c0            |
 | 3     | c1            |
