@@ -549,21 +549,41 @@ On Intel, AMD and ARM CPUs with vector registers but without AES vector instruct
 
 And unsurprinsingly, on CPUS without vector registers, AEGIS-128L and AEGIS-256 are consistently faster than their parallel counterparts.
 
-However, on an Intel Raptor Lake processor (Core i9-13900K) with the VAES instruction set, AEGIS-128X with a parallelism degree of $2$ is almost twice as fast as AEGIS-128L with large inputs.
+However, on CPUs with the VAES instruction set such as an Intel Raptor Lake processor (table \ref{i9-13900K}) or an AMD EPYC CPU (table \ref{epyc-7543}), AEGIS-128X with a parallelism degree of $2$ is almost twice as fast as AEGIS-128L with large inputs.
 
-\begin{center}
-  \begin{tabular}{|c|c|}
-    \hline
-    Algorithm  & Throughput  \\
-    \hline
-    AEGIS-128X & 39781 MiB/s \\
-    \hline
-    AEGIS-128L & 23863 MiB/s \\
-    \hline
-    AES128-GCM & 10243 MiB/s \\
-    \hline
-  \end{tabular}
-\end{center}
+\begin{table}
+  \begin{center}
+    \begin{tabular}{|c|c|}
+      \hline
+      Algorithm  & Throughput  \\
+      \hline
+      AEGIS-128X & 39781 MiB/s \\
+      \hline
+      AEGIS-128L & 23863 MiB/s \\
+      \hline
+      AES128-GCM & 10243 MiB/s \\
+      \hline
+    \end{tabular}
+    \caption{\label{i9-13900K}Intel Core i9-13900K benchmark (single core)}
+  \end{center}
+\end{table}
+
+\begin{table}
+  \begin{center}
+    \begin{tabular}{|c|c|}
+      \hline
+      Algorithm  & Throughput  \\
+      \hline
+      AEGIS-128X & 29070 MiB/s \\
+      \hline
+      AEGIS-128L & 15178 MiB/s \\
+      \hline
+      AES128-GCM & 4387 MiB/s  \\
+      \hline
+    \end{tabular}
+    \caption{\label{epyc-7543}AMD EPYC 7543 benchmark (single core)}
+  \end{center}
+\end{table}
 
 The benchmarked AES128-GCM implementation is the one from OpenSSL 3.1.0, while the AEGIS implementations are the reference code of the AEGIS specification, as well as our modified version to support for 128X variant.
 
