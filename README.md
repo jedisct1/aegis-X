@@ -104,7 +104,7 @@ AEGIS-128L defines the initial state as eight AES blocks set to:
 
 | block | initial value |
 | ----- | ------------- |
-| 0     | k             |
+| 0     | k ^ n         |
 | 1     | c1            |
 | 2     | c0            |
 | 3     | c1            |
@@ -142,7 +142,7 @@ These blocks are interleaved to produce `p` independent `|m|/p` bit messages `{ 
 
 ```
 M[0]   ← m[0]   ‖ m[p]       ‖ m[2p]       ‖ m[3p] …
-M[1]   ← m[1]   ‖ m[p+1]     ‖ m[2p+1]     ‖ m[3p+2] …
+M[1]   ← m[1]   ‖ m[p+1]     ‖ m[2p+1]     ‖ m[3p+1] …
 M[2]   ← m[2]   ‖ m[p+2]     ‖ m[2p+2]     ‖ m[3p+2] …
 …
 M[p-1] ← m[p-1] ‖ m[p+(p-1)] ‖ m[2p+(p-1)] ‖ m[3p+(p-1)] …
@@ -194,7 +194,7 @@ AesBlockXp: [p]AesBlock
 
 With proper hardware support, `AesBlockXP` can be efficiently stored in a 256-bit or 512-bit register.
 
-The AEGIS-128X state only differs from the AEGIS-128L by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
+The AEGIS-128X state only differs from the AEGIS-128L state by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
 
 ```
 State128X: [8]AesBlockXp
@@ -224,7 +224,7 @@ In order to satisfy the AEGIS-128L contract, we should either derive distinct ke
 
 `p` is limited by the hardware, and guaranteed to be small. On general purpose CPUs, the context cannot exceed `3`.
 
-We could limit the AEGIS-128X nonce size to `128-log(p)` bits (instead of 128 for AEGIS-128L), encoding the context in the remaining bits to create the nonce used by the underlying AEGIS-128L functions.
+We could limit the AEGIS-128X nonce size to `128-log(p)` bits (instead of 128 for AEGIS-128L), encoding the context in the remaining bits to create the nonce used by the underlying AEGIS-128L function.
 
 That would be effectively AEGIS-128L, evaluated with independent messages, and distinct key and nonce pairs.
 
