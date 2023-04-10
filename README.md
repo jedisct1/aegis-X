@@ -194,7 +194,7 @@ AesBlockXp: [p]AesBlock
 
 With proper hardware support, `AesBlockXP` can be efficiently stored in a 256-bit or 512-bit register.
 
-The AEGIS-128X state only differs from the AEGIS-128L by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
+The AEGIS-128X state only differs from the AEGIS-128L state by the fact that is uses 8 vectors of AES blocks instead of 8 AES blocks:
 
 ```
 State128X: [8]AesBlockXp
@@ -224,7 +224,7 @@ In order to satisfy the AEGIS-128L contract, we should either derive distinct ke
 
 `p` is limited by the hardware, and guaranteed to be small. On general purpose CPUs, the context cannot exceed `3`.
 
-We could limit the AEGIS-128X nonce size to `128-log(p)` bits (instead of 128 for AEGIS-128L), encoding the context in the remaining bits to create the nonce used by the underlying AEGIS-128L functions.
+We could limit the AEGIS-128X nonce size to `128-log(p)` bits (instead of 128 for AEGIS-128L), encoding the context in the remaining bits to create the nonce used by the underlying AEGIS-128L function.
 
 That would be effectively AEGIS-128L, evaluated with independent messages, and distinct key and nonce pairs.
 
