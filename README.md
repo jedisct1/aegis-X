@@ -13,7 +13,7 @@ It is equivalent to evaluating multiple AEGIS-128L instances in parallel with di
 
 # Specification
 
-[Adding more parallelism to the AEGIS authenticated encryption algorithms](aegis-x.pdf)
+[Adding more parallelism to the AEGIS authenticated encryption algorithms](https://github.com/jedisct1/aegis-128X/raw/master/aegis-x.pdf)
 
 # Benchmarks
 
