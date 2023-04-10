@@ -85,7 +85,7 @@ That effectively limits the parallelism of the construction to the parallelism o
 
 In \cite{FSE:BogLauTis15}, Bogdanov, Lauridsen, and Tischhauser made a similar observation regarding multiple candidates of the CAESAR competition. They proposed a novel "comb scheduler" able to process multiple messages simultaneously.
 
-The mode presented here also encrypts multiple messages simultaneously using the same cipher, but assumes that they are derived from a common message, and share the same key, initialization vector and length.
+The modes presented here also encrypt multiple messages simultaneously using the same cipher, but assume that they are fragments of the same message, and share the same key, initialization vector and length.
 
 Given a parallelism degree $\nu$, an input message is split into $\nu$ evenly distributed parts, that can be encrypted concurrently. The resulting ciphertexts are then combined, as well as their authentication tags.
 
