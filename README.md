@@ -11,7 +11,7 @@ AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenti
 
 # Specification
 
-[Adding more parallelism to the AEGIS authenticated encryption algorithms](https://github.com/jedisct1/aegis-128X/raw/master/aegis-x.pdf)
+[Adding more parallelism to the AEGIS authenticated encryption algorithms](aegis-x.pdf)
 
 # Benchmarks
 
