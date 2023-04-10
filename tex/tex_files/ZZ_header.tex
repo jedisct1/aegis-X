@@ -1,0 +1,261 @@
+%!TEX root=../main.tex
+
+% Packages
+%
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc}
+\usepackage{xspace}
+\usepackage{amsmath} %\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{pifont}
+\usepackage{etoolbox}
+\usepackage[normalem]{ulem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage{cite}
+\usepackage{multibib}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{paralist}
+\usepackage{mathrsfs}
+\usepackage{relsize}
+\usepackage{stmaryrd}
+\usepackage[textsize=small]{todonotes}
+\usepackage{multirow}
+\usepackage[lambda,n,operators]{cryptocode}
+
+\newtoggle{notes}
+\toggletrue{notes} % set to false to remove colored notes from the paper
+
+%--------------------------------------------------------
+% Editorial
+%--------------------------------------------------------
+
+\newcommand{\redunderline}[1]{\textcolor{red}{\underline{\textcolor{black}{#1}}}} 
+\newcommand{\TBW}{\textcolor{blue}{\textbf{To Be Written...}}}
+\newcommand{\Note}[1]{\textcolor{magenta}{ $\langle \! \langle$ #1 $\rangle \! \rangle$}}
+\newcommand{\todonote}[1]{\todo[inline]{MyName: #1}}
+
+%--------------------------------------------------------
+% General notations
+%--------------------------------------------------------
+
+\let\vec\mathbf
+\newcommand{\bit}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\getsr}{\leftarrow_{r}}
+\newcommand{\poly}{\ensuremath{\mathsf{poly}}\xspace}
+
+%--------------------------------------------------------
+% Standard proba, games, proofs, sampling, distributions
+%--------------------------------------------------------
+
+\newcommand{\Good}{\ensuremath{\mathsf{Good}}\xspace}
+\newcommand{\Bad}{\ensuremath{\mathsf{Bad}}\xspace}
+\newcommand{\equivStat}{\ensuremath{\overset{\mathsf{stat}}{\equiv}}\xspace}
+\newcommand{\equivComp}{\ensuremath{\overset{\mathsf{comp}}{\equiv}}\xspace}
+\newcommand{\view}{\ensuremath{\textsc{View}}\xspace}
+\newcommand{\state}{\ensuremath{\mathsf{st}}\xspace}
+\newcommand{\st}{\state}
+\newcommand{\Hyb}{\ensuremath{\mathsf{Hyb}}\xspace}
+\newcommand{\Exp}{\ensuremath{\mathsf{Exp}}\xspace}
+\newcommand{\myGame}{\ensuremath{\mathsf{Game}}\xspace}
+\newcommand{\Event}{\ensuremath{\mathsf{E}}\xspace}
+\newcommand{\Span}{\ensuremath{\mathsf{Span}}}
+\newcommand{\prob}[1]{{\Pr}\left[\,{#1}\,\right]}
+\newcommand{\probb}[2]{{\Pr}_{#1}\left[\,{#2}\,\right]}
+\newcommand{\Dx}{\mathcal{D}}
+\newcommand{\Hx}{\mathcal{H}}
+\newcommand{\Sx}{\mathcal{S}}
+\newcommand{\Lx}{\mathcal{L}}
+\newcommand{\Dist}{\mathcal{D}}
+\newcommand{\Expect}{\ensuremath{\mathbb{E}}\xspace}
+\newcommand{\Sample}{\ensuremath{\mathsf{Sample}}\xspace}
+\newcommand{\Sim}{\ensuremath{\mathsf{Sim}}\xspace}
+
+%--------------------------------------------------------
+% Adversaries, oracles
+%--------------------------------------------------------
+
+\newcommand{\AdvA}{\ensuremath{\mathcal{A}}\xspace}
+\newcommand{\AdvB}{\ensuremath{\mathcal{B}}\xspace}
+\newcommand{\AdvC}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\AdvD}{\ensuremath{\mathcal{D}}\xspace}
+
+\newcommand{\adv}{\ensuremath{\mathsf{Adv}}\xspace}
+\newcommand{\oracle}{\ensuremath{\mathcal{O}}\xspace}
+
+%--------------------------------------------------------
+% Classes, sets, groups
+%--------------------------------------------------------
+
+\newcommand{\BPP}{\ensuremath{\mathsf{BPP}}\xspace}
+\newcommand{\NP}{\ensuremath{\mathsf{NP}}\xspace}
+\newcommand{\coNP}{\ensuremath{\mathsf{coNP}}\xspace}
+\newcommand{\PSPACE}{\ensuremath{\mathsf{PSPACE}}\xspace}
+\newcommand{\NC}{\ensuremath{\mathsf{NC}}\xspace}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\G}{\mathbb{G}}
+\newcommand{\Gt}{\mathbb{G}_{\mathsf{T}}}
+\newcommand{\Hset}{\mathbb{H}}
+\newcommand{\Zn}{\mathbb{Z}_n}
+\newcommand{\Group}{\mathbb{G}}
+
+\newcommand{\Lang}{\ensuremath{\mathscr{L}}}
+\newcommand{\Lpar}{\ensuremath{\Lang_{\param}}\xspace}
+\newcommand{\setX}{\mathcal{X}}
+\newcommand{\setY}{\mathcal{Y}}
+\newcommand{\keyspace}{\mathcal{K}}
+
+
+%--------------------------------------------------------
+% Primitives, algorithms
+%--------------------------------------------------------
+
+\newcommand{\proverS}{\ensuremath{\mathsf{P}_{\Sigma}}\xspace}
+\newcommand{\verifierS}{\ensuremath{\mathsf{V}_{\Sigma}}\xspace}
+\newcommand{\prover}{\ensuremath{\mathsf{P}}\xspace}
+\newcommand{\verifier}{\ensuremath{\mathsf{V}}\xspace}
+\newcommand{\sender}{\ensuremath{\mathsf{S}}\xspace}
+\newcommand{\receiver}{\ensuremath{\mathsf{R}}\xspace}
+\newcommand{\ZK}{\textsf{ZK}\xspace}
+\newcommand{\zk}{\textsf{zk}\xspace}
+\newcommand{\HVZK}{\textsf{HVZK}\xspace}
+\newcommand{\NIZK}{\hardprobfont{NIZK}\xspace}
+\newcommand{\NIZKs}{\hardprobfont{NIZKs}\xspace}
+\newcommand{\NIWI}{\hardprobfont{NIWI}\xspace}
+\newcommand{\sigmap}{$\Sigma$-protocol\xspace}
+\newcommand{\sigmaps}{$\Sigma$-protocols\xspace}
+\newcommand{\OT}{\ensuremath{\mathsf{OT}}\xspace}
+\newcommand{\OTs}{\ensuremath{\mathsf{OTs}}\xspace}
+\newcommand{\Eval}{\ensuremath{\mathsf{Eval}}\xspace}
+\newcommand{\PRG}{\ensuremath{\mathsf{PRG}}\xspace}
+\newcommand{\Hash}{\ensuremath{\mathsf{H}}\xspace}
+\newcommand{\Setup}{\ensuremath{\mathsf{Setup}}\xspace}
+\newcommand{\GroupGen}{\textsf{BilinearGen}\xspace}
+\newcommand{\DDHGen}{\textsf{DHGen}\xspace}
+\newcommand{\PGen}{\textsf{PGen}\xspace}
+\newcommand{\KeyGen}{\ensuremath{\mathsf{KeyGen}}\xspace}
+\newcommand{\Enc}{\ensuremath{\mathsf{Enc}}\xspace}
+\newcommand{\Dec}{\ensuremath{\mathsf{Dec}}\xspace}
+\newcommand{\INDCCA}{\ensuremath{\mathsf{IND\text{-}CCA}}\xspace}
+\newcommand{\INDCPA}{\ensuremath{\mathsf{IND\text{-}CPA}}\xspace}
+\newcommand{\Rand}{\ensuremath{\mathsf{Rand}}\xspace}
+\newcommand{\com}{\ensuremath{\mathsf{com}}\xspace}
+\newcommand{\Commit}{\ensuremath{\mathsf{Commit}}\xspace}
+\newcommand{\Prove}{\ensuremath{\mathsf{Prove}}\xspace}
+\newcommand{\prove}{\ensuremath{\mathsf{prove}}\xspace}
+\newcommand{\Verify}{\ensuremath{\mathsf{Verify}}\xspace}
+\newcommand{\Answer}{\ensuremath{\mathsf{Answer}}\xspace}
+\newcommand{\Open}{\ensuremath{\mathsf{Open}}\xspace}
+\newcommand{\myproof}{\ensuremath{\vec{\pi}}\xspace}
+\newcommand{\Gen}{\ensuremath{\mathsf{Setup}}\xspace}
+\newcommand{\KGen}{\ensuremath{\mathsf{KeyGen}}\xspace}
+\newcommand{\Equivocate}{\ensuremath{\mathsf{Equivocate}}\xspace}
+\newcommand{\SimSetup}{\ensuremath{\mathsf{SimSetup}}\xspace}
+\newcommand{\Stretch}{\ensuremath{\mathsf{Stretch}}\xspace}
+\newcommand{\Trapdoor}{\ensuremath{\mathsf{Trapdoor}}\xspace}
+
+\newcommand{\pk}{\ensuremath{\mathsf{pk}}\xspace}
+\newcommand{\sk}{\ensuremath{\mathsf{sk}}\xspace}
+\newcommand{\ek}{\ensuremath{\mathsf{ek}}\xspace}
+\newcommand{\vk}{\ensuremath{\mathsf{vk}}\xspace}
+\newcommand{\pvk}{\ensuremath{\mathsf{pvk}}\xspace}
+\newcommand{\PVK}{\ensuremath{\mathsf{PVK}}\xspace}
+\newcommand{\hk}{\ensuremath{\mathsf{hk}}\xspace}
+\newcommand{\aux}{\ensuremath{{\mathsf{aux}}}\xspace}
+\newcommand{\crs}{\ensuremath{{\mathsf{crs}}}\xspace}
+\newcommand{\param}{\ensuremath{{\mathsf{par}}}\xspace}
+\newcommand{\trap}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\eps}{\varepsilon}
+
+%--------------------------------------------------------
+% Hard problems
+%--------------------------------------------------------
+
+\newcommand{\hardprobfont}[1]{\texorpdfstring{\ensuremath{\textsf{#1}}}{#1}}
+\newcommand{\kLIN}{\ensuremath{k\text{-}\mathsf{Lin}}\xspace}
+\newcommand{\SEDL}{\hardprobfont{SEDL}\xspace}
+\newcommand{\DL}{\hardprobfont{DL}\xspace}
+\newcommand{\DDH}{\hardprobfont{DDH}\xspace}
+\newcommand{\kerDH}{\hardprobfont{kerDH}\xspace}
+\newcommand{\kernel}{\mathsf{ker}\xspace}
+\newcommand{\DHP}{\hardprobfont{DH}\xspace}
+\newcommand{\DLin}{\hardprobfont{DLin}\xspace}
+\newcommand{\XDH}{\hardprobfont{XDH}\xspace}
+\newcommand{\CDH}{\hardprobfont{CDH}\xspace}
+\newcommand{\LWE}{\hardprobfont{LWE}\xspace}
+\newcommand{\SXDH}{\hardprobfont{SXDH}\xspace}
+\newcommand{\DCR}{\hardprobfont{DCR}\xspace}
+\newcommand{\dlog}{\ensuremath{\mathsf{dlog}}\xspace}
+
+%--------------------------------------------------------
+% Various
+%--------------------------------------------------------
+
+\newcommand{\map}{\ensuremath{\mathsf{map}}\xspace}
+\newcommand{\mode}{\mathsf{mode}}
+\newcommand{\token}{\ensuremath{\mathsf{token}}\xspace}
+\newcommand{\seed}{\ensuremath{\mathsf{seed}}\xspace}
+\newcommand{\inp}{\ensuremath{\mathsf{in}}\xspace}
+\newcommand{\outp}{\ensuremath{\mathsf{out}}\xspace}
+\newcommand{\circuit}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\size}[1]{\ensuremath{\left\vert #1 \right\vert}\xspace}
+\newcommand{\myand}{\ensuremath{\mathsf{and}}\xspace}
+\newcommand{\myxor}{\ensuremath{\mathsf{xor}}\xspace}
+\newcommand{\xor}{\mathbin{\mathsf{xor}}}
+\newcommand{\mynot}{\ensuremath{\mathsf{not}}\xspace}
+\newcommand{\Input}{\ensuremath{\mathsf{Input}}\xspace}
+\newcommand{\pp}{\ensuremath{\mathsf{pp}}\xspace}
+
+
+%--------------------------------------------------------
+% Double angle brackets
+%--------------------------------------------------------
+
+\makeatletter
+\DeclareFontFamily{OMX}{MnSymbolE}{}
+\DeclareSymbolFont{MnLargeSymbols}{OMX}{MnSymbolE}{m}{n}
+\SetSymbolFont{MnLargeSymbols}{bold}{OMX}{MnSymbolE}{b}{n}
+\DeclareFontShape{OMX}{MnSymbolE}{m}{n}{
+    <-6>  MnSymbolE5
+   <6-7>  MnSymbolE6
+   <7-8>  MnSymbolE7
+   <8-9>  MnSymbolE8
+   <9-10> MnSymbolE9
+  <10-12> MnSymbolE10
+  <12->   MnSymbolE12
+}{}
+\DeclareFontShape{OMX}{MnSymbolE}{b}{n}{
+    <-6>  MnSymbolE-Bold5
+   <6-7>  MnSymbolE-Bold6
+   <7-8>  MnSymbolE-Bold7
+   <8-9>  MnSymbolE-Bold8
+   <9-10> MnSymbolE-Bold9
+  <10-12> MnSymbolE-Bold10
+  <12->   MnSymbolE-Bold12
+}{}
+
+\let\llangle\@undefined
+\let\rrangle\@undefined
+\DeclareMathDelimiter{\llangle}{\mathopen}%
+                     {MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
+\DeclareMathDelimiter{\rrangle}{\mathclose}%
+                     {MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
+\makeatother
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:
