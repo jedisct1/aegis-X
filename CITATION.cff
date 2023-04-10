@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: AEGIS-128X and AEGIS-256X implementations
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Frank
+    family-names: Denis
+    email: fde@00f.net
+    affiliation: Fastly Inc.
+    orcid: 'https://orcid.org/0009-0008-4417-1713'
+repository-code: 'https://github.com/jedisct1/aegis-128x'
+url: 'https://github.com/jedisct1/aegis-128x'
+abstract: >-
+  Parallel variants of the AEGIS-128L and AEGIS-256
+  authenticated encryption algorithms.
+keywords:
+  - crypto
+  - aead
+  - aegis
+license: BSD-2-Clause
