@@ -69,7 +69,7 @@
 \begin{abstract}
   While the round function of the AEGIS authenticated encryption algorithms is highly parallelisable, their mode of operation is not.
 
-  We introduce two new modes to overcome that limitation: AEGIS-128X and AEGIS-256X. With minimal changes to existing implementations, they achieve a speedup of factor 4 over AEGIS-128L and AEGIS-256 on Intel CPUs with the VAES and AVX-512 instruction sets.
+  We introduce two new modes to overcome that limitation: AEGIS-128X and AEGIS-256X, that require minimal changes to existing implementations and retain the security properties of AEGIS-128L and AEGIS-256.
 \end{abstract}
 
 \section{Introduction}
@@ -78,14 +78,14 @@
 AEGIS \cite{SAC:WuPre13} is a family of three authenticated encryption algorithms, originally designed to leverage the AES-NI instructions set introduced by Intel in 2010 \cite{Akdemir2010BreakthroughAP}.
 These instructions perform several compute intensive parts of the AES algorithm, significantly improving the performance of software AES implementations while minimizing the risks of side channel attacks.
 
-Concurrent AES round instructions are required to fully utilize the AES pipelines.
-And the variant with the largest state, AEGIS-128L, updates eight 128-bit AES blocks concurrently.
-However, the mode of operation is similar to a duplex: after its initialization, the state is continuously updated by applying the round function to itself.
+However, concurrent AES round instructions are required to fully utilize the AES pipelines. The AEGIS round function was specifically designed with this in mind, and allows up to 8 AES blocks to be updated concurrently.
+
+Nonetheless, the mode of operation is similar to a duplex: after its initialization, the state is continuously updated by applying the round function to itself.
 That effectively limits the parallelism of the construction to the parallelism of the round function.
 
 In \cite{FSE:BogLauTis15}, Bogdanov, Lauridsen, and Tischhauser made a similar observation regarding multiple candidates of the CAESAR competition. They proposed a novel "comb scheduler" able to process multiple messages simultaneously.
 
-The mode presented here also encrypts multiple messages simultaneously using the same cipher, but assumes that they share the same key, initialization vector and length.
+The mode presented here also encrypts multiple messages simultaneously using the same cipher, but assumes that they are derived from a common message, and share the same key, initialization vector and length.
 
 Given a parallelism degree $\nu$, an input message is split into $\nu$ evenly distributed parts, that can be encrypted concurrently. The resulting ciphertexts are then combined, as well as their authentication tags.
 
@@ -120,12 +120,12 @@ The operations, variables and functions used in this document are defined below.
   $AD_i$                & : & 128-bit associated data block                                   \\
   $\hat{AD}$            & : & $AD$, padded to $r \cdot \nu$ bits                              \\
   $\hat{AD}_i$          & : & 128-bit associated data block                                   \\
-  $\overline{AD}_i$     & : & $\hat{AD}$ fragment $i$ ($\frac{\lvert AD \rvert}{\nu}$ bits)   \\
+  $\overline{AD}_i$     & : & $\hat{AD}$ fragment ($\frac{\lvert \hat{AD} \rvert}{\nu}$ bits) \\
   $\overline{AD}_{i,j}$ & : & 128-bit $\hat{AD}$ fragment block                               \\
   $C$                   & : & Ciphertext                                                      \\
   $\hat{C}$             & : & $C$, padded to $r \cdot \nu$ bits                               \\
   $\hat{C}_i$           & : & A 128-bit ciphertext block                                      \\
-  $\overline{C}_i$      & : & $C$ fragment $i$ ($\frac{\lvert C \rvert}{\nu}$ bits)           \\
+  $\overline{C}_i$      & : & $C$ fragment ($\frac{\lvert \hat{C} \rvert}{\nu}$ bits)         \\
   $\overline{C}_{i,j}$  & : & 128-bit $C$ fragment block                                      \\
   $const_0$             & : & First half of the AEGIS constant (128 bits)                     \\
   $const_1$             & : & Second half of the AEGIS constant (128 bits)                    \\
@@ -137,7 +137,7 @@ The operations, variables and functions used in this document are defined below.
   $P$                   & : & Plaintext                                                       \\
   $\hat{P}$             & : & $P$, padded to $r \cdot \nu$ bits                               \\
   $\hat{P}_i$           & : & 128-bit plaintext block                                         \\
-  $\overline{P}$        & : & $P$ fragment ($\lceil \frac{\lvert P \rvert}{\nu} \rceil$ bits) \\
+  $\overline{P}$        & : & $P$ fragment ($\frac{\lvert \hat{P} \rvert}{\nu}$ bits)         \\
   $\overline{P}_i$      & : & 128-bit $P$ fragment block                                      \\
   $IV_{128}$            & : & 128-bit initialization vector (AEGIS-128, -128L)                \\
   $IV_{256}$            & : & 256-bit initialization vector  (AEGIS-256)                      \\
@@ -156,11 +156,7 @@ The operations, variables and functions used in this document are defined below.
 
 From an application perspective, new AEGIS variants should ideally share the same interface as existing variants. Namely, they should accept a single message, optional associated data, a 128 or 256 bit key, and a 128 or 256 bit initialization vector.
 
-\paragraph{}
-
 However, AEGIS is meant to be used in a nonce-respecting scenario \cite{ACNS:VauViz18}. Clearly, reusing the same key and $IV$ to encrypt different parts of a message would violate that contract.
-
-\paragraph{}
 
 In order to avoid universal forgery and decryption attacks, we augment the AEGIS initialization functions with a context.
 
@@ -316,7 +312,7 @@ Note that when $CTX = 0$, the resulting state is exactly the same as AEGIS-256, 
   \end{algorithmic}
 \end{algorithm}
 
-\section{The AEGIS-128X and AEGIS-256 modes}
+\section{The AEGIS-128X and AEGIS-256X modes}
 \label{sec:parallel processing}
 
 AEGIS absorbs the associated data and message with a rate $r$ with $r=256$ for AEGIS-128L and $r=128$ for AEGIS-128 and AEGIS-256.
@@ -486,11 +482,8 @@ Also note that $\nu$ is expected to be a hyperparameter, that an adversary canno
 
 \paragraph{}
 
-The main concern with the same $(K, IV)$ pair used in different contexts are differential attacks.
-
-\paragraph{}
-
-In AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. In \cite{STSI23}, Shiraya at al. showed that the initialization phase of AEGIS-128L is secure against differential attacks after 3 update steps.
+Differential attacks are a major concern with the same $(K, IV)$ pair used in different contexts.
+However, in AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. In \cite{STSI23}, Shiraya at al. showed that the initialization phase of AEGIS-128L is secure against differential attacks after 3 update steps.
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit initialization vectors are absorbed in AEGIS-128L.
 
@@ -541,7 +534,7 @@ On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-1
 
 \begin{itemize}
   \item by emulating AES vector instructions. This is the easiest option, keeping the code close to hardware-accelerated versions.
-  \item by evaluating $\{ \overline{A}_0, \overline{A}_1, \overline{A}_2, \ldots \overline{A}_{p-1} \}$ and $\{ \overline{C}_0, \overline{C}_1, \overline{C}_2, \ldots \overline{C}_{p-1} \}$ sequentially, with periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
+  \item by evaluating $\{ \overline{A}_0, \overline{A}_1, \overline{A}_2, \ldots \overline{A}_{p-1} \}$ and $\{ \overline{C}_0, \overline{C}_1, \overline{C}_2, \ldots \overline{C}_{p-1} \}$ sequentially, with a periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
 \end{itemize}
 
 \section{Performance evaluation}
