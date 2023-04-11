@@ -65,6 +65,7 @@
 \maketitle
 
 \markboth{}{}
+\graphicspath{ {images/} }
 
 \begin{abstract}
   While the round function of the AEGIS authenticated encryption algorithms is highly parallelisable, their mode of operation is not.
@@ -543,16 +544,15 @@ On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-1
 \section{Performance evaluation}
 \label{sec:performance evaluation}
 
-The AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ inputs are transformed into evenly distributed fragments.
-As a result, they only yield a performance improvement over their underlying primitives when $\lvert A \rvert > r$ or $\lvert P \rvert > r$.
-
 We implemented AEGIS-128X$[2]$ and AEGIS-256X$[2]$ using the Zig programming language. The code \cite{GitHub:AEGISX} is nearly identical to the reference implementations from the AEGIS specification \cite{DSL2023}, with the \lstinline{AesBlock} type extended to 2 AES blocks.
 
 On Intel, AMD and ARM CPUs with vector registers but without AES vector instructions, AEGIS-128L and AEGIS-256 have better or comparable performance.
 
 And unsurprinsingly, on CPUS without vector registers, AEGIS-128L and AEGIS-256 are consistently faster than their parallel counterparts.
 
-However, on CPUs with the VAES instruction set such as an Intel Raptor Lake processor (table \ref{i9-13900K}) or an AMD EPYC CPU (table \ref{epyc-7543}), AEGIS-128X$[2]$ is almost twice as fast as AEGIS-128L with large inputs.
+However, on CPUs with the VAES instruction set such as an Intel Raptor Lake processor (table \ref{i9-13900K}) or an AMD EPYC CPU (table \ref{epyc-7543}, plot \ref{epyc-7543-graph}), AEGIS-128X$[2]$ is almost twice as fast as AEGIS-128L with medium to large inputs.
+
+With short inputs, the overhead of the parallel versions is small (plot \ref{epyc-7543-graph-short}). AEGIS-128X$[2]$ is faster than AEGIS-128L as soon as the input size reaches 256 bytes, and AEGIS-256X$[2]$ beats AEGIS-256 for inputs of size 128 or more.
 
 \begin{table}
   \begin{center}
@@ -567,7 +567,7 @@ However, on CPUs with the VAES instruction set such as an Intel Raptor Lake proc
       AES128-GCM      & 10243 MiB/s \\
       \hline
     \end{tabular}
-    \caption{\label{i9-13900K}Intel Core i9-13900K benchmark (single core)}
+\caption{\label{i9-13900K}Intel Core i9-13900K benchmark numbers (single core)}
   \end{center}
 \end{table}
 
@@ -577,18 +577,28 @@ However, on CPUs with the VAES instruction set such as an Intel Raptor Lake proc
       \hline
       Algorithm       & Throughput  \\
       \hline
-      AEGIS-128X$[2]$ & 29070 MiB/s \\
+AEGIS-128X$[2]$ & 239 Gbps \\
       \hline
-      AEGIS-128L      & 15178 MiB/s \\
-      \hline
-      AES128-GCM      & 4387 MiB/s  \\
+AEGIS-128L      & 118 Gbps \\
+\hline
+AES128-GCM      & 37 Gbps  \\
       \hline
     \end{tabular}
-\caption{\label{epyc-7543}AMD EPYC 7543 benchmark (single core)}
+\caption{\label{epyc-7543}AMD EPYC 7543 benchmark numbers (single core)}
   \end{center}
 \end{table}
 
 The benchmarked AES128-GCM implementation is the one from OpenSSL 3.1.0, while the AEGIS implementations are the reference code of the AEGIS specification, as well as our modified version to support for 128X variant.
+
+\begin{center}
+  \label{epyc-7543-graph}AMD EPYC 7543 benchmark (single core)
+  \includegraphics[width=0.75\textwidth]{bench-amd}
+\end{center}
+
+\begin{center}
+  \label{epyc-7543-graph-short}AMD EPYC 7543 benchmark (short inputs)
+  \includegraphics[width=0.75\textwidth]{bench-amd-short}
+\end{center}
 
 \ifnum\fullversion=0
   \bibliographystyle{splncs03}
