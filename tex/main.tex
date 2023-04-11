@@ -540,7 +540,7 @@ This perfectly matches the AEGIS-128X$[2]$ interleaved representation. In additi
 
 \paragraph{}
 
-On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ can be implemented in two different ways:
+On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ can be implemented in different ways:
 
 \begin{itemize}
   \item by emulating AES vector instructions. This is the easiest option, keeping the code close to hardware-accelerated versions.
