@@ -99,8 +99,7 @@ The operations, variables and functions used in this document are defined below.
 \subsection{Operations}
 
 \begin{tabular}{l c p{.5\textwidth}}
-  $\lvert x \rvert$              & : & Size of $x$ in bits                                    \\
-  $\lceil x \rceil$              & : & Ceiling operation; the smallest integer $\geq x$       \\
+$\lvert x \rvert$              & : & Size of $x$ in bits                                    \\
   $x \oplus y$                   & : & Bit-wise exclusive OR                                  \\
   $\F_{128L}(S, m_0, m_1)$       & : & AEGIS-128L state update function                       \\
   $\F_{256}(S, m)$               & : & AEGIS-256 state update function                        \\
@@ -108,8 +107,8 @@ The operations, variables and functions used in this document are defined below.
   $Pad(x,\ell)$                  & : & Add trailing $0$ bits to pad $x$ to $\ell$ bits        \\
   $Enc_{128L}(CTX, K, IV, A, M)$ & : & AEGIS-128L encryption function with context separation \\
   $Enc_{256}(CTX, K, IV, A, M)$  & : & AEGIS-256 encryption function with context separation  \\
-  $Enc_{128X,\nu}(K, IV, A, M)$  & : & AEGIS-128X$[\nu]$ parallel encryption function         \\
-  $Enc_{256X,\nu}(K, IV, A, M)$  & : & AEGIS-256X$[\nu]$ parallel encryption function         \\
+$Enc_{128X}[\nu](K, IV, A, M)$  & : & AEGIS-128X$[\nu]$ parallel encryption function         \\
+$Enc_{256X}[\nu](K, IV, A, M)$  & : & AEGIS-256X$[\nu]$ parallel encryption function         \\
   $Trunc(x, \ell)$               & : & Truncate $x$ to the first $\ell$ bits                  \\
 \end{tabular}
 
@@ -158,7 +157,7 @@ From an application perspective, new AEGIS variants should ideally share the sam
 
 However, AEGIS is meant to be used in a nonce-respecting scenario \cite{ACNS:VauViz18}. Clearly, reusing the same key and $IV$ to encrypt different parts of a message would violate that contract.
 
-In order to avoid universal forgery and decryption attacks, we augment the AEGIS initialization functions with a context, meant to provide domain separation. That is, for two different values $CTX_0 \neq CTX_1$, $Enc_{\cdot}(CTX_0, \cdot)$ and $Enc_{\cdot}(CTX_1, \cdot)$ act as two different functions of $\{ K, IV, A, M \}$.
+In order to avoid universal forgery and decryption attacks, we augment the AEGIS initialization functions with a context, meant to provide domain separation. That is, for two different values $CTX_0 \neq CTX_1$, $Enc_{\cdot}[\cdot](CTX_0, \cdot)$ and $Enc_{\cdot}[\cdot](CTX_1, \cdot)$ act as two different functions of $\{ K, IV, A, M \}$.
 
 \subsection{Augmenting AEGIS-128L for context separation}
 \label{sec:augmenting AEGIS-128L for context separation}
@@ -453,7 +452,7 @@ AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ have the same requirements.
 
 \paragraph{}
 
-$Enc_{128X,\nu}(K, IV, A, M)$ can be seen as $\nu$ evaluations of AEGIS-128L, on $\nu$ independent messages of length $\lceil \frac{\lvert P \rvert}{\nu} \rceil$ bits.
+$Enc_{128X}[\nu](K, IV, A, M)$ can be seen as $\nu$ evaluations of AEGIS-128L, on $\nu$ independent messages of the same length.
 
 \paragraph{}
 
@@ -499,7 +498,7 @@ Note that the addition of a context to the AEGIS-128L initialization function co
 
 \paragraph{}
 
-The same observations apply to AEGIS-256X$[\nu]$ and its $Enc_{256X,\nu}$ encryption function.
+The same observations apply to AEGIS-256X$[\nu]$ and its $Enc_{256X}[\nu]$ encryption function.
 
 \paragraph{}
 
@@ -543,7 +542,7 @@ On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-1
 The AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ inputs are transformed into evenly distributed fragments.
 As a result, they only yield a performance improvement over their underlying primitives when $\lvert A \rvert > r$ or $\lvert P \rvert > r$.
 
-We implemented AEGIS-128X$[2]$ and AEGIS-256X$[2]$ using the Zig programming language. The code is nearly identical to the reference implementations from the AEGIS specification \cite{DSL2023}, with the \lstinline{AesBlock} type extended to 2 AES blocks.
+We implemented AEGIS-128X$[2]$ and AEGIS-256X$[2]$ using the Zig programming language. The code \cite{GitHub:AEGISX} is nearly identical to the reference implementations from the AEGIS specification \cite{DSL2023}, with the \lstinline{AesBlock} type extended to 2 AES blocks.
 
 On Intel, AMD and ARM CPUs with vector registers but without AES vector instructions, AEGIS-128L and AEGIS-256 have better or comparable performance.
 
@@ -581,7 +580,7 @@ However, on CPUs with the VAES instruction set such as an Intel Raptor Lake proc
       AES128-GCM      & 4387 MiB/s  \\
       \hline
     \end{tabular}
-    \caption{\label{epyc-7543}AMD EPYC 7543 benchmark (single core)}
+\caption{\label{epyc-7543}AMD EPYC 7543 benchmark (single core)}
   \end{center}
 \end{table}
 
