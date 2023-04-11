@@ -99,18 +99,18 @@ The operations, variables and functions used in this document are defined below.
 \subsection{Operations}
 
 \begin{tabular}{l c p{.5\textwidth}}
-  $\lvert x \rvert$              & : & Size of $x$ in bits                                        \\
-  $\lceil x \rceil$              & : & Ceiling operation; the smallest integer $\geq x$           \\
-  $x \oplus y$                   & : & Bit-wise exclusive OR                                      \\
-  $\F_{128}(S, d_0, d_1)$        & : & AEGIS-128 state update function                            \\
-  $\F_{256}(S, d)$               & : & AEGIS-256 state update function                            \\
-  $x \| y$                       & : & Concatenation of $x$ and $y$                               \\
-  $Pad(x,\ell)$                  & : & Add trailing $0$ bits to pad $x$ to $\ell$ bits            \\
-  $Enc_{128L}(CTX, K, IV, A, M)$ & : & The AEGIS-128L encryption function with context separation \\
-  $Enc_{256}(CTX, K, IV, A, M)$  & : & The AEGIS-256 encryption function with context separation  \\
-  $Enc_{128X,\nu}(K, IV, A, M)$  & : & The AEGIS-128X parallel encryption function                \\
-  $Enc_{256X,\nu}(K, IV, A, M)$  & : & The AEGIS-256X parallel encryption function                \\
-  $Trunc(x, \ell)$               & : & Truncate $x$ to the first $\ell$ bits                      \\
+  $\lvert x \rvert$              & : & Size of $x$ in bits                                    \\
+  $\lceil x \rceil$              & : & Ceiling operation; the smallest integer $\geq x$       \\
+  $x \oplus y$                   & : & Bit-wise exclusive OR                                  \\
+  $\F_{128L}(S, m_0, m_1)$       & : & AEGIS-128L state update function                       \\
+  $\F_{256}(S, m)$               & : & AEGIS-256 state update function                        \\
+  $x \| y$                       & : & Concatenation of $x$ and $y$                           \\
+  $Pad(x,\ell)$                  & : & Add trailing $0$ bits to pad $x$ to $\ell$ bits        \\
+  $Enc_{128L}(CTX, K, IV, A, M)$ & : & AEGIS-128L encryption function with context separation \\
+  $Enc_{256}(CTX, K, IV, A, M)$  & : & AEGIS-256 encryption function with context separation  \\
+  $Enc_{128X,\nu}(K, IV, A, M)$  & : & AEGIS-128X parallel encryption function                \\
+  $Enc_{256X,\nu}(K, IV, A, M)$  & : & AEGIS-256X parallel encryption function                \\
+  $Trunc(x, \ell)$               & : & Truncate $x$ to the first $\ell$ bits                  \\
 \end{tabular}
 
 \subsection{Variables and constants}
@@ -158,7 +158,7 @@ From an application perspective, new AEGIS variants should ideally share the sam
 
 However, AEGIS is meant to be used in a nonce-respecting scenario \cite{ACNS:VauViz18}. Clearly, reusing the same key and $IV$ to encrypt different parts of a message would violate that contract.
 
-In order to avoid universal forgery and decryption attacks, we augment the AEGIS initialization functions with a context.
+In order to avoid universal forgery and decryption attacks, we augment the AEGIS initialization functions with a context, meant to provide domain separation. That is, for two different values $CTX_0 \neq CTX_1$, $Enc_{\cdot}(CTX_0, \cdot)$ and $Enc_{\cdot}(CTX_1, \cdot)$ act as two different functions of $\{ K, IV, A, M \}$.
 
 \subsection{Augmenting AEGIS-128L for context separation}
 \label{sec:augmenting AEGIS-128L for context separation}
@@ -199,7 +199,7 @@ From this state, the original AEGIS-128L initialization function performs 10 upd
     \State $S \gets \{ K_{128} \oplus IV_{128}, const_1, const_0, const_1, K_{128} \oplus IV_{128}, K_{128} \oplus const_0, K_{128} \oplus const_1, K_{128} \oplus const_0 \}$
     \State $i \gets 0$
     \While{$i < 10$}
-    \State $S \gets \F_{128}(S, IV_{128}, K_{128})$
+    \State $S \gets \F_{128L}(S, IV_{128}, K_{128})$
     \State $i \gets i+1$
     \EndWhile
     \EndFunction
@@ -225,7 +225,7 @@ Note that when $CTX = 0$, the resulting state is exactly the same as AEGIS-128L,
     \While{$i < 10$}
     \State $S_3 \gets S_3 \oplus Pad(CTX, 128)$
     \State $S_7 \gets S_7 \oplus Pad(CTX, 128)$
-    \State $S \gets \F_{128}(S, IV_{128}, K_{128})$
+    \State $S \gets \F_{128L}(S, IV_{128}, K_{128})$
     \State $i \gets i+1$
     \EndWhile
     \EndFunction
@@ -317,9 +317,9 @@ Note that when $CTX = 0$, the resulting state is exactly the same as AEGIS-256, 
 
 AEGIS absorbs the associated data and message with a rate $r$ with $r=256$ for AEGIS-128L and $r=128$ for AEGIS-128 and AEGIS-256.
 
-We define two new modes: AEGIS-128X and AEGIS-256X, that absorb $r \cdot \nu$ bits per state update.
+We define two new modes: AEGIS-128X and AEGIS-256X, that absorb $r \cdot \nu$ bits per state update, spread over $\nu$ concurrent instances of the AEGIS-128L or AEGIS-256 encryption functions.
 
-In the encryption function, the associated data $AD$ and plaintext $P$ are distributed in interleaved blocks with a stride of $r \cdot \nu$ bits as they arrive. The last blocks are padded if necessary.
+The associated data $AD$ and plaintext $P$ are split into interleaved blocks with a stride of $r \cdot \nu$ bits as they arrive. The last blocks are padded if necessary.
 
 \paragraph{}
 
@@ -438,8 +438,8 @@ Finally, the AEGIS-256X authentication tag is the bit-wise exclusive OR of the A
 
 Note that AEGIS-256 is a specific instance of AEGIS-256X with $\nu=1$.
 
-\section{Security}
-\label{sec:security}
+\section{Rationale}
+\label{sec:rationale}
 
 The AEGIS security claims have the following requirements:
 
