@@ -596,7 +596,7 @@ The benchmarked AES128-GCM implementation is the one from OpenSSL 3.1.0, while t
 \end{center}
 
 \begin{center}
-  \label{epyc-7543-graph-short}AMD EPYC 7543 benchmark (short inputs)
+  \label{epyc-7543-graph-short}AMD EPYC 7543 benchmark (single core, short inputs)
   \includegraphics[width=0.75\textwidth]{bench-amd-short}
 \end{center}
 
@@ -606,5 +606,64 @@ The benchmarked AES128-GCM implementation is the one from OpenSSL 3.1.0, while t
   \bibliographystyle{alpha-short}
 \fi
 \bibliography{cryptobib/abbrev3,add}
+
+\appendix
+
+\section{Test vectors}
+\label{sec:test vectors}
+
+Test vectors (in hexadecimal format) of AEGIS-128X and AEGIS-256X are given below.
+
+\subsection{AEGIS-128X$[2]$}
+
+\subsubsection{Test vector 1}
+
+\begin{lstlisting}
+Key:         000102030405060708090a0b0c0d0e0f
+IV:          101112131415161718191a1b1c1d1e1f
+AD:          (empty)
+Plaintext:   (empty)
+Ciphertext:  (empty)
+128-bit tag: d180aa6a90f29dedd6825b8c053f599b
+\end{lstlisting}
+
+\subsubsection{Test vector 2}
+
+\begin{lstlisting}
+Key:         000102030405060708090a0b0c0d0e0f
+IV:          101112131415161718191a1b1c1d1e1f
+AD:          0102030401020304
+Plaintext:   050607080506070805060708
+Ciphertext:  985bac76fe1cefaa0b24d4d2
+128-bit tag: 790b9a7342ee72e8b45202cd9c6195cf
+\end{lstlisting}
+
+\subsection{AEGIS-256X$[2]$}
+
+\subsubsection{Test vector 1}
+
+\begin{lstlisting}
+Key:         000102030405060708090a0b0c0d0e0f
+             101112131415161718191a1b1c1d1e1f
+IV:          101112131415161718191a1b1c1d1e1f
+             202122232425262728292a2b2c2d2e2f
+AD:          (empty)
+Plaintext:   (empty)
+Ciphertext:  (empty)
+128-bit tag: ddbc7695b01623f82eee962f160bf267
+\end{lstlisting}
+
+\subsubsection{Test vector 2}
+
+\begin{lstlisting}
+Key:         000102030405060708090a0b0c0d0e0f
+             101112131415161718191a1b1c1d1e1f
+IV:          101112131415161718191a1b1c1d1e1f
+             202122232425262728292a2b2c2d2e2f
+AD:          0102030401020304
+Plaintext:   050607080506070805060708
+Ciphertext:  a0b3f5b6b93db779c9d1b9de
+128-bit tag: fd2e93a6eb0b74dc30eb984fbec1d657
+\end{lstlisting}
 
 \end{document}
