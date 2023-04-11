@@ -78,7 +78,7 @@
 AEGIS \cite{SAC:WuPre13} is a family of three authenticated encryption algorithms, originally designed to leverage the AES-NI instructions set introduced by Intel in 2010 \cite{Akdemir2010BreakthroughAP}.
 These instructions perform several compute intensive parts of the AES algorithm, significantly improving the performance of software AES implementations while minimizing the risks of side channel attacks.
 
-However, concurrent AES round instructions are required to fully utilize the AES pipelines. The AEGIS round function was specifically designed with this in mind, and allows up to 8 AES blocks to be updated concurrently.
+However, concurrent AES round instructions are required to fully utilize the AES pipelines. The AEGIS round function was specifically designed with this in mind, and allows up to 8 AES blocks to be updated concurrently. Its design made it the fastest candidate of the CAESAR competition on Intel CPUs with hardware AES acceleration \cite{EPRINT:ARAR16}.
 
 Nonetheless, the mode of operation is similar to a duplex: after its initialization, the state is continuously updated by applying the round function to itself.
 That effectively limits the parallelism of the construction to the parallelism of the round function.
@@ -89,7 +89,7 @@ The modes presented here also encrypt multiple messages simultaneously using the
 
 Given a parallelism degree $\nu$, an input message is split into $\nu$ evenly distributed parts, that can be encrypted concurrently. The resulting ciphertexts are then combined, as well as their authentication tags.
 
-The underlying encryption algorithms are the existing AEGIS algorithms, with a minor modification to their initialization functions.
+The underlying encryption algorithms remain the existing AEGIS algorithms, with a minor addition to their initialization functions.
 
 \section{Operations, Variables and Functions}
 \label{sec:notation}
@@ -108,8 +108,8 @@ The operations, variables and functions used in this document are defined below.
   $Pad(x,\ell)$                  & : & Add trailing $0$ bits to pad $x$ to $\ell$ bits        \\
   $Enc_{128L}(CTX, K, IV, A, M)$ & : & AEGIS-128L encryption function with context separation \\
   $Enc_{256}(CTX, K, IV, A, M)$  & : & AEGIS-256 encryption function with context separation  \\
-  $Enc_{128X,\nu}(K, IV, A, M)$  & : & AEGIS-128X parallel encryption function                \\
-  $Enc_{256X,\nu}(K, IV, A, M)$  & : & AEGIS-256X parallel encryption function                \\
+  $Enc_{128X,\nu}(K, IV, A, M)$  & : & AEGIS-128X$[\nu]$ parallel encryption function         \\
+  $Enc_{256X,\nu}(K, IV, A, M)$  & : & AEGIS-256X$[\nu]$ parallel encryption function         \\
   $Trunc(x, \ell)$               & : & Truncate $x$ to the first $\ell$ bits                  \\
 \end{tabular}
 
@@ -317,7 +317,7 @@ Note that when $CTX = 0$, the resulting state is exactly the same as AEGIS-256, 
 
 AEGIS absorbs the associated data and message with a rate $r$ with $r=256$ for AEGIS-128L and $r=128$ for AEGIS-128 and AEGIS-256.
 
-We define two new modes: AEGIS-128X and AEGIS-256X, that absorb $r \cdot \nu$ bits per state update, spread over $\nu$ concurrent instances of the AEGIS-128L or AEGIS-256 encryption functions.
+We define two new modes: AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$, that absorb $r \cdot \nu$ bits per state update, spread over $\nu$ concurrent instances of the AEGIS-128L or AEGIS-256 encryption functions.
 
 The associated data $AD$ and plaintext $P$ are split into interleaved blocks with a stride of $r \cdot \nu$ bits as they arrive. The last blocks are padded if necessary.
 
@@ -352,7 +352,7 @@ Similarly, $\hat{P}$ is split into $\nu$ independent $\frac{\lvert \hat{P} \rver
 
 \subsection{AEGIS-128X}
 
-AEGIS-128X encrypts and authenticates the plaintext and associated data fragments independently, producing $\nu$ ciphertexts $\{\overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ and authentication tags $\{\overline{T}_0, \overline{T}_1, \ldots \overline{T}_{\nu-1} \}$.
+AEGIS-128X$[\nu]$ encrypts and authenticates the plaintext and associated data fragments independently, producing $\nu$ ciphertexts $\{\overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ and authentication tags $\{\overline{T}_0, \overline{T}_1, \ldots \overline{T}_{\nu-1} \}$.
 
 \begin{math}
   \\
@@ -365,7 +365,7 @@ AEGIS-128X encrypts and authenticates the plaintext and associated data fragment
 
 \paragraph{}
 
-$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the AEGIS-128X ciphertext:
+$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the final ciphertext:
 
 \paragraph{}
 
@@ -380,7 +380,7 @@ $\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterl
 
 \paragraph{}
 
-Finally, the AEGIS-128X authentication tag is the bit-wise exclusive OR of the AEGIS-128L authentication tags:
+Finally, the AEGIS-128X$[\nu]$ authentication tag is the bit-wise exclusive $OR$ of the AEGIS-128L authentication tags:
 
 \paragraph{}
 
@@ -390,13 +390,13 @@ Finally, the AEGIS-128X authentication tag is the bit-wise exclusive OR of the A
 
 \paragraph{}
 
-Note that AEGIS-128L is a specific instance of AEGIS-128X with $\nu=1$.
+Note that AEGIS-128L equivalent to AEGIS-128X$[1]$.
 
 \subsection{AEGIS-256X}
 
-AEGIS-256X uses the exact same interleaving technique as AEGIS-128X in order to process $r \cdot \nu$ bits per state update.
+AEGIS-256X$[\nu]$ uses the exact same interleaving technique as AEGIS-128X$[\nu]$ in order to process $r \cdot \nu$ bits per state update.
 
-The only difference being that fragments are encrypted and authenticated using the AEGIS-256 function instead of AEGIS-128L.
+The only difference being that fragments are encrypted and authenticated using the AEGIS-256 encryption function instead of the AEGIS-128L one.
 
 \paragraph{}
 
@@ -411,7 +411,7 @@ The only difference being that fragments are encrypted and authenticated using t
 
 \paragraph{}
 
-$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the AEGIS-128X ciphertext:
+$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the AEGIS-128X$[\nu]$ ciphertext:
 
 \paragraph{}
 
@@ -426,7 +426,7 @@ $\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterl
 
 \paragraph{}
 
-Finally, the AEGIS-256X authentication tag is the bit-wise exclusive OR of the AEGIS-256 authentication tags:
+Finally, the AEGIS-256X$[\nu]$ authentication tag is the bit-wise exclusive OR of the AEGIS-256 authentication tags:
 
 \paragraph{}
 
@@ -436,7 +436,7 @@ Finally, the AEGIS-256X authentication tag is the bit-wise exclusive OR of the A
 
 \paragraph{}
 
-Note that AEGIS-256 is a specific instance of AEGIS-256X with $\nu=1$.
+Note that AEGIS-256 equivalent to AEGIS-256X$[1]$.
 
 \section{Rationale}
 \label{sec:rationale}
@@ -449,7 +449,7 @@ The AEGIS security claims have the following requirements:
   \item If verification fails, the decrypted plaintext and the wrong authentication tag should not be given as output.
 \end{itemize}
 
-AEGIS-128X and AEGIS-256X have the same requirements.
+AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ have the same requirements.
 
 \paragraph{}
 
@@ -463,13 +463,13 @@ In order to satisfy the AEGIS-128L contract, we should either derive distinct ke
 
 The parallelism degree $\nu$, and thus the bounds of $CTX$, are limited by the hardware, and guaranteed to be small.
 
-We could limit the AEGIS-128X $IV$ size to $128-log_2(\nu)$ bits (instead of $128$ for AEGIS-128L), encoding the context in the remaining bits to create the $IV$ used by the underlying AEGIS-128L function.
+We could limit the AEGIS-128X$[\nu]$ $IV$ size to $128-log_2(\nu)$ bits (instead of $128$ for AEGIS-128L), encoding the context in the remaining bits to create the $IV$ used by the underlying AEGIS-128L function.
 That would be effectively AEGIS-128L, evaluated with independent messages, and distinct $(K, IV)$ pairs.
 However, from an application perspective, a $128-log_2(\nu)$ bit initialization vector would be unusual, and at odds with AEGIS-128L.
 
 \paragraph{}
 
-Ideally, we'd like AEGIS-128L to internally support $128+log_2(\nu)$-bit initialization vectors: AEGIS-128X applications would use 128 bit initialization vectors, but the context could still be encoded to separate the parallel AEGIS-128L instances.
+Ideally, we'd like AEGIS-128L to internally support $128+log_2(\nu)$-bit initialization vectors: AEGIS-128X$[\nu]$ applications would use 128 bit initialization vectors, but the context could still be encoded to separate the parallel AEGIS-128L instances.
 To put it differently, we need to introduce a context with the same differential properties as the initialization vector.
 
 \paragraph{}
@@ -483,7 +483,7 @@ Also note that $\nu$ is expected to be a hyperparameter, that an adversary canno
 \paragraph{}
 
 Differential attacks could be a concern with the same $(K, IV)$ pair used in different contexts.
-However, in AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. In \cite{STSI23}, Shiraya at al. showed that the initialization phase of AEGIS-128L is secure against differential attacks after 3 update steps.
+But in AEGIS-128L, there are 80 AES round functions (10 update steps) in the initialization function. In \cite{STSI23}, Shiraya at al. showed that the initialization phase of AEGIS-128L is secure against differential attacks after 3 update steps.
 
 Furthermore, in order to prevent the difference in the state being eliminated completely in the middle of the initialization, the context difference is repeatedly injected into the state. This is consistent with how 128-bit initialization vectors are absorbed in AEGIS-128L.
 
@@ -491,7 +491,7 @@ The addition of a short context is thus unlikely to invalidate any of the curren
 
 \paragraph{}
 
-The above security claims require a key and $IV$ pair not to be used with different tag sizes. The AEGIS-128X construction guarantees that internal AEGIS-128L evaluations will always share the same tag size.
+The above security claims require a key and $IV$ pair not to be used with different tag sizes. The AEGIS-128X$[\nu]$ construction guarantees that internal AEGIS-128L evaluations will always share the same tag size.
 
 \paragraph{}
 
@@ -499,7 +499,7 @@ Note that the addition of a context to the AEGIS-128L initialization function co
 
 \paragraph{}
 
-The same observations apply to AEGIS-256X and its $Enc_{256X,\nu}$ encryption function.
+The same observations apply to AEGIS-256X$[\nu]$ and its $Enc_{256X,\nu}$ encryption function.
 
 \paragraph{}
 
@@ -507,13 +507,13 @@ In the AEGIS-256 initialization function, there are 96 round functions (16 updat
 
 \paragraph{}
 
-We'd like to emphasize that AEGIS-128X and AEGIS-256 are not new algorithms. They are modes, built on top of AEGIS-128L and AEGIS-256. designed to preserve the same security guarantees and requirements.
+We'd like to emphasize that AEGIS-128X$[\nu]$ and AEGIS-256 are not new algorithms. They are modes, built on top of AEGIS-128L and AEGIS-256. designed to preserve the same security guarantees and requirements.
 Keys must be generated uniformly at random, key and $IV$ pairs must not be reused, and for both variants the success rate of a forgery attack remains $2^{-\lvert T \rvert}$.
 
 \section{Implementation notes}
 \label{sec:implementation notes}
 
-Implementing AEGIS-128X and AEGIS-256X only requires trivial modifications to existing AEGIS-128L and AEGIS-256 implementations.
+Implementing AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ only requires trivial modifications to existing AEGIS-128L and AEGIS-256 implementations.
 
 They apply the exact same operations as AEGIS-128L and AEGIS-256, to vectors of AES blocks instead of single blocks.
 
@@ -526,42 +526,42 @@ For example, with 256-bit registers, two AEGIS-128L states $S$ and $S^{\prime}$ 
 
 \paragraph{}
 
-This perfectly matches the AEGIS-128X interleaved representation. In addition to the forward AES permutation, updating an AEGIS state only requires the bit-wise OR and AND operations. Even with wide registers, such operations are very efficient on any CPU with vector instructions.
+This perfectly matches the AEGIS-128X$[2]$ interleaved representation. In addition to the forward AES permutation, updating an AEGIS state only requires the bit-wise OR and AND operations. Even with wide registers, such operations are very efficient on any CPU with vector instructions.
 
 \paragraph{}
 
-On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-128X and AEGIS-256X can be implemented in two different ways:
+On CPUs that don't implement vectorized versions of the AES permutation, AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ can be implemented in two different ways:
 
 \begin{itemize}
   \item by emulating AES vector instructions. This is the easiest option, keeping the code close to hardware-accelerated versions.
-  \item by evaluating $\{ \overline{A}_0, \overline{A}_1, \overline{A}_2, \ldots \overline{A}_{p-1} \}$ and $\{ \overline{C}_0, \overline{C}_1, \overline{C}_2, \ldots \overline{C}_{p-1} \}$ sequentially, with a periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
+  \item by evaluating $\{ \overline{A}_0, \overline{A}_1, \overline{A}_2, \ldots \overline{A}_{\nu-1} \}$ and $\{ \overline{C}_0, \overline{C}_1, \overline{C}_2, \ldots \overline{C}_{\nu-1} \}$ sequentially, with a periodic synchronization, for example after every memory page. This reduces cache-locality but also register pressure.
 \end{itemize}
 
 \section{Performance evaluation}
 \label{sec:performance evaluation}
 
-The AEGIS-128X and AEGIS-256X inputs are transformed into evenly distributed fragments.
+The AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ inputs are transformed into evenly distributed fragments.
 As a result, they only yield a performance improvement over their underlying primitives when $\lvert A \rvert > r$ or $\lvert P \rvert > r$.
 
-We implemented AEGIS-128X and AEGIS-256X using the Zig programming language. The code is nearly identical to the reference implementations from the AEGIS specification \cite{DSL2023}, with the \lstinline{AesBlock} type extended to 2 and 4 AES blocks.
+We implemented AEGIS-128X$[2]$ and AEGIS-256X$[2]$ using the Zig programming language. The code is nearly identical to the reference implementations from the AEGIS specification \cite{DSL2023}, with the \lstinline{AesBlock} type extended to 2 AES blocks.
 
 On Intel, AMD and ARM CPUs with vector registers but without AES vector instructions, AEGIS-128L and AEGIS-256 have better or comparable performance.
 
 And unsurprinsingly, on CPUS without vector registers, AEGIS-128L and AEGIS-256 are consistently faster than their parallel counterparts.
 
-However, on CPUs with the VAES instruction set such as an Intel Raptor Lake processor (table \ref{i9-13900K}) or an AMD EPYC CPU (table \ref{epyc-7543}), AEGIS-128X with a parallelism degree of $2$ is almost twice as fast as AEGIS-128L with large inputs.
+However, on CPUs with the VAES instruction set such as an Intel Raptor Lake processor (table \ref{i9-13900K}) or an AMD EPYC CPU (table \ref{epyc-7543}), AEGIS-128X$[\nu]$ with a parallelism degree of $2$ is almost twice as fast as AEGIS-128L with large inputs.
 
 \begin{table}
   \begin{center}
     \begin{tabular}{|c|c|}
       \hline
-      Algorithm  & Throughput  \\
+      Algorithm         & Throughput  \\
       \hline
-      AEGIS-128X & 39781 MiB/s \\
+      AEGIS-128X$[\nu]$ & 39781 MiB/s \\
       \hline
-      AEGIS-128L & 23863 MiB/s \\
+      AEGIS-128L        & 23863 MiB/s \\
       \hline
-      AES128-GCM & 10243 MiB/s \\
+      AES128-GCM        & 10243 MiB/s \\
       \hline
     \end{tabular}
     \caption{\label{i9-13900K}Intel Core i9-13900K benchmark (single core)}
@@ -572,13 +572,13 @@ However, on CPUs with the VAES instruction set such as an Intel Raptor Lake proc
   \begin{center}
     \begin{tabular}{|c|c|}
       \hline
-      Algorithm  & Throughput  \\
+      Algorithm         & Throughput  \\
       \hline
-      AEGIS-128X & 29070 MiB/s \\
+      AEGIS-128X$[\nu]$ & 29070 MiB/s \\
       \hline
-      AEGIS-128L & 15178 MiB/s \\
+      AEGIS-128L        & 15178 MiB/s \\
       \hline
-      AES128-GCM & 4387 MiB/s  \\
+      AES128-GCM        & 4387 MiB/s  \\
       \hline
     \end{tabular}
     \caption{\label{epyc-7543}AMD EPYC 7543 benchmark (single core)}
