@@ -449,15 +449,26 @@ The AEGIS security claims have the following requirements:
   \item If verification fails, the decrypted plaintext and the wrong authentication tag should not be given as output.
 \end{itemize}
 
+\paragraph{}
+
 AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ have the same requirements.
 
 \paragraph{}
+
+We'd like to emphasize that AEGIS-128X$[\nu]$ and AEGIS-256 are not new algorithms. They are modes, built on top of AEGIS-128L and AEGIS-256. designed to preserve the same security guarantees and requirements.
+Keys must be generated uniformly at random, key and $IV$ pairs must not be reused, and for both variants the success rate of a forgery attack remains $2^{-\lvert T \rvert}$.
+
+\paragraph{}
+
+We did not include a parallel variant of AEGIS-128, as opposed to AEGIS-128L. AEGIS-128 trades performance for a smaller state size. But given that performance is the main justification for AEGIS-128X, AEGIS-128L feels like a more natural choice.
+
+\subsection{Implications of the AEGIS-128L context addition}
 
 $Enc_{128X}[\nu](K, IV, A, M)$ can be seen as $\nu$ evaluations of AEGIS-128L, on $\nu$ independent messages of the same length.
 
 \paragraph{}
 
-In order to satisfy the AEGIS-128L contract, we should either derive distinct keys for each of these messages, or use distinct initialization vectors.
+One way to satisfy the AEGIS-128L contract while reusing the key is to use distinct initialization vectors for each of the message fragments.
 
 \paragraph{}
 
@@ -497,22 +508,17 @@ The above security claims require a key and $IV$ pair not to be used with differ
 
 Note that the addition of a context to the AEGIS-128L initialization function could also be used to create a different initial state for different tag sizes, effectively increasing misuse resistance.
 
-\paragraph{}
+\subsection{Implications of the AEGIS-256 context addition}
 
 The same observations apply to AEGIS-256X$[\nu]$ and its $Enc_{256X}[\nu]$ encryption function.
+
+AEGIS-256 has a large initialization vector (256 bits). Exposing a shorter $IV$ to applications while leveraging the remaining space for context separation would be reasonable. That would still allow applications to use random nonces with a negligible collision probability.
+
+However, the large initialization vector has practical benefits, such as the ability to include a \emph{protocol-specific} context with no overhead. In order to retain the same convenience as AEGIS-256 and for consistency with AEGIS-128X, our own context is added in a similar fashion.
 
 \paragraph{}
 
 In the AEGIS-256 initialization function, there are 96 round functions (16 update steps). According to the MILP-based evaluation from \cite{STSI23}, AEGIS-256 is secure against differential attacks after 6 update steps.
-
-\paragraph{}
-
-We'd like to emphasize that AEGIS-128X$[\nu]$ and AEGIS-256 are not new algorithms. They are modes, built on top of AEGIS-128L and AEGIS-256. designed to preserve the same security guarantees and requirements.
-Keys must be generated uniformly at random, key and $IV$ pairs must not be reused, and for both variants the success rate of a forgery attack remains $2^{-\lvert T \rvert}$.
-
-\paragraph{}
-
-We did not include a parallel variant of AEGIS-128, as opposed to AEGIS-128L. AEGIS-128 trades performance for a smaller state size. But given that performance is the main justification for AEGIS-128X, AEGIS-128L feels like a more natural choice.
 
 \section{Implementation notes}
 \label{sec:implementation notes}
