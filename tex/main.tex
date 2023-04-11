@@ -43,9 +43,9 @@
 
 \input{tex_files/ZZ_header}
 
-\title{Adding more parallelism to the AEGIS authenticated encryption algorithms (v1.0)}
-\titlerunning{AEGIS-128X and AEGIS-256X (v1.0)}
-\date{Apr 11, 2023}
+\title{Adding more parallelism to the AEGIS authenticated encryption algorithms}
+\titlerunning{AEGIS-128X and AEGIS-256X}
+\date{Apr, 2023}
 
 \ifnum\anonymous=0
 \author{
@@ -351,7 +351,7 @@ Similarly, $\hat{P}$ is split into $\nu$ independent $\frac{\lvert \hat{P} \rver
 
 \subsection{AEGIS-128X}
 
-AEGIS-128X$[\nu]$ encrypts and authenticates the plaintext and associated data fragments independently, producing $\nu$ ciphertexts $\{\overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ and authentication tags $\{\overline{T}_0, \overline{T}_1, \ldots \overline{T}_{\nu-1} \}$.
+AEGIS-128X$[\nu]$ first encrypts and authenticates the plaintext and associated data fragments independently, producing $\nu$ ciphertexts $\{\overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ and authentication tags $\{\overline{T}_0, \overline{T}_1, \ldots \overline{T}_{\nu-1} \}$.
 
 \begin{math}
   \\
@@ -389,7 +389,7 @@ Finally, the AEGIS-128X$[\nu]$ authentication tag is the bit-wise exclusive $OR$
 
 \paragraph{}
 
-Note that AEGIS-128L equivalent to AEGIS-128X$[1]$.
+Note that AEGIS-128L and AEGIS-128X$[1]$ are equivalent.
 
 \subsection{AEGIS-256X}
 
@@ -410,7 +410,7 @@ The only difference being that fragments are encrypted and authenticated using t
 
 \paragraph{}
 
-$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the AEGIS-128X$[\nu]$ ciphertext:
+$\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterleaved to produce the AEGIS-256X$[\nu]$ ciphertext:
 
 \paragraph{}
 
@@ -425,7 +425,7 @@ $\{ \overline{C}_0, \overline{C}_1, \ldots \overline{C}_{\nu-1} \}$ are deinterl
 
 \paragraph{}
 
-Finally, the AEGIS-256X$[\nu]$ authentication tag is the bit-wise exclusive OR of the AEGIS-256 authentication tags:
+Finally, the AEGIS-256X$[\nu]$ authentication tag is the bit-wise exclusive $OR$ of the AEGIS-256 authentication tags:
 
 \paragraph{}
 
@@ -435,7 +435,7 @@ Finally, the AEGIS-256X$[\nu]$ authentication tag is the bit-wise exclusive OR o
 
 \paragraph{}
 
-Note that AEGIS-256 equivalent to AEGIS-256X$[1]$.
+Note that AEGIS-256 and AEGIS-256X$[1]$ are equivalent.
 
 \section{Rationale}
 \label{sec:rationale}
@@ -509,12 +509,16 @@ In the AEGIS-256 initialization function, there are 96 round functions (16 updat
 We'd like to emphasize that AEGIS-128X$[\nu]$ and AEGIS-256 are not new algorithms. They are modes, built on top of AEGIS-128L and AEGIS-256. designed to preserve the same security guarantees and requirements.
 Keys must be generated uniformly at random, key and $IV$ pairs must not be reused, and for both variants the success rate of a forgery attack remains $2^{-\lvert T \rvert}$.
 
+\paragraph{}
+
+We did not include a parallel variant of AEGIS-128, as opposed to AEGIS-128L. AEGIS-128 trades performance for a smaller state size. But given that performance is the main justification for AEGIS-128X, AEGIS-128L feels like a more natural choice.
+
 \section{Implementation notes}
 \label{sec:implementation notes}
 
 Implementing AEGIS-128X$[\nu]$ and AEGIS-256X$[\nu]$ only requires trivial modifications to existing AEGIS-128L and AEGIS-256 implementations.
 
-They apply the exact same operations as AEGIS-128L and AEGIS-256, to vectors of AES blocks instead of single blocks.
+They apply the exact same operations as AEGIS-128L and AEGIS-256, to vectors of $\nu$ AES blocks instead of single blocks.
 
 For example, with 256-bit registers, two AEGIS-128L states $S$ and $S^{\prime}$ can be stored as:
 
