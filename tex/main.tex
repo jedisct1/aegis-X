@@ -70,7 +70,7 @@
 \begin{abstract}
 While the round function of the AEGIS authenticated encryption algorithms is highly parallelizable, their mode of operation is not.
 
-  We introduce two new modes to overcome that limitation: AEGIS-128X and AEGIS-256X, that require minimal changes to existing implementations and retain the security properties of AEGIS-128L and AEGIS-256.
+We introduce two new modes to overcome that limitation: AEGIS-128X and AEGIS-256X, that require minimal changes to existing implementations and retain the security properties of AEGIS-128L and AEGIS-256.
 \end{abstract}
 
 \section{Introduction}
@@ -81,10 +81,10 @@ These instructions perform several compute intensive parts of the AES algorithm,
 
 However, concurrent AES round instructions are required to fully utilize the AES pipelines. The AEGIS round function was specifically designed with this in mind, and allows up to 8 AES blocks to be updated concurrently. Its design made it the fastest candidate of the CAESAR competition on Intel CPUs with hardware AES acceleration \cite{EPRINT:ARAR16}.
 
-Nonetheless, the mode of operation is similar to a duplex: after its initialization, the state is continuously updated by applying the round function to itself.
+Nonetheless, the mode of operation is similar to a duplex: after its initialization, the state is recursively updated.
 That effectively limits the parallelism of the construction to the parallelism of the round function.
 
-In \cite{FSE:BogLauTis15}, Bogdanov, Lauridsen, and Tischhauser made a similar observation regarding multiple candidates of the CAESAR competition. They proposed a novel "comb scheduler" able to process multiple messages simultaneously.
+In \cite{FSE:BogLauTis15}, Bogdanov, Lauridsen, and Tischhauser made a similar observation regarding multiple candidates of the CAESAR competition. They proposed a novel "comb scheduler" to process multiple messages simultaneously.
 
 The modes presented here also encrypt multiple messages simultaneously using the same cipher, but assume that they are fragments of the same message, and share the same key, initialization vector and length.
 
