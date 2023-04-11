@@ -101,7 +101,7 @@ The operations, variables and functions used in this document are defined below.
 
 \begin{tabular}{l c p{.5\textwidth}}
 $\lvert x \rvert$              & : & Size of $x$ in bits                                    \\
-  $x \oplus y$                   & : & Bit-wise exclusive OR                                  \\
+$x \oplus y$                   & : & Bit-wise exclusive $OR$                                  \\
   $\F_{128L}(S, m_0, m_1)$       & : & AEGIS-128L state update function                       \\
   $\F_{256}(S, m)$               & : & AEGIS-256 state update function                        \\
   $x \| y$                       & : & Concatenation of $x$ and $y$                           \\
@@ -209,7 +209,7 @@ From this state, the original AEGIS-128L initialization function performs 10 upd
 \paragraph{}
 
 We augment this function to accept a context parameter $CTX$.
-Before each update, the context is added to the 3rd and 7th words of the state, as described in algorithm \ref{aegis-128l initialization with context}
+Before each update, the context is added to the blocks at index 3 and 7 of the state, as described in algorithm \ref{aegis-128l initialization with context}
 
 \paragraph{}
 
@@ -282,7 +282,7 @@ From this state, the original AEGIS-256 initialization function performs 16 upda
 \end{algorithm}
 
 We augment this function to accept a context parameter $CTX$.
-Before each update, the context is added to the 3rd and 5th words of the state, as described in algorithm \ref{aegis-256 initialization with context}
+Before each update, the context is added to the blocks at index 0 and 5 of the state, as described in algorithm \ref{aegis-256 initialization with context}
 
 Note that when $CTX = 0$, the resulting state is exactly the same as AEGIS-256, as originally specified, without a context.
 
