@@ -1,7 +1,7 @@
 # AEGIS-128X and AEGIS-256X
 
 - [AEGIS-128X and AEGIS-256X](#aegis-128x-and-aegis-256x)
-- [Specification](#specification)
+- [Specification and rationale](#specification-and-rationale)
 - [Benchmarks](#benchmarks)
     - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
   - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
@@ -9,9 +9,9 @@
 
 AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
 
-# Specification
+# Specification and rationale
 
-[Adding more parallelism to the AEGIS authenticated encryption algorithms](aegis-x.pdf)
+[Adding more parallelism to the AEGIS authenticated encryption algorithms](https://eprint.iacr.org/2023/523)
 
 # Benchmarks
 
