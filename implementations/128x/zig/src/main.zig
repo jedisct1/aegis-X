@@ -138,7 +138,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             }
             if (tag_length == 16) {
                 const tag32 = s[0].xorBlocks(s[1]).xorBlocks(s[2]).xorBlocks(s[3])
-                    .xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[5]).toBytes();
+                    .xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[6]).toBytes();
                 var tag: [tag_length]u8 = undefined;
                 for (tag, 0..) |_, j| {
                     tag[j] = tag32[j] ^ tag32[j + 16];
