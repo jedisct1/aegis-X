@@ -66,9 +66,9 @@ OpenSSL 3 AES benchmarks on the same machine:
 Zig benchmark (single core):
 
 ```text
-   blake3 (rust/asm):    4570 MiB/s
-   aegis-128l mac:      24381 MiB/s
    aegis-128x mac:      37537 MiB/s
+   aegis-128l mac:      24381 MiB/s
+   blake3 (rust/asm):    4570 MiB/s
 ```
 
 ## Scaleway EPYC 7543 instance
@@ -96,9 +96,9 @@ OpenSSL 3 AES benchmarks on the same machine:
 Zig benchmark (single core):
 
 ```text
-   blake3 (rust/asm):    4900 MiB/s
-   aegis-128l mac:      20768 MiB/s
    aegis-128x mac:      31992 MiB/s
+   aegis-128l mac:      20768 MiB/s
+   blake3 (rust/asm):    4900 MiB/s
 ```
 
 Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512.
