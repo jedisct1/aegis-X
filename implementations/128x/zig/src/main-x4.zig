@@ -14,6 +14,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
     return struct {
         const Self = @This();
+        pub const block_length: usize = 128;
         pub const key_length: usize = 16;
         pub const nonce_length: usize = 16;
         pub const tag_length: usize = 16;
@@ -76,6 +77,12 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
                 self.update(nonce_block, key_block);
             }
             return self;
+        }
+
+        fn absorb(state: *Self, src: *const [128]u8) void {
+            const msg0 = AesBlockX4.fromBytes(src[0..64]);
+            const msg1 = AesBlockX4.fromBytes(src[64..128]);
+            state.update(msg0, msg1);
         }
 
         fn enc(self: *Self, xi: *const [128]u8) [128]u8 {
@@ -176,12 +183,12 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
             var i: usize = 0;
             while (i + 128 <= ad.len) : (i += 128) {
-                _ = aegis.enc(ad[i..][0..128]);
+                aegis.absorb(ad[i..][0..128]);
             }
             if (ad.len % 128 != 0) {
                 var pad = [_]u8{0} ** 128;
                 mem.copy(u8, pad[0 .. ad.len % 128], ad[i..]);
-                _ = aegis.enc(&pad);
+                aegis.absorb(&pad);
             }
 
             i = 0;
@@ -212,12 +219,12 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
             var i: usize = 0;
             while (i + 128 <= ad.len) : (i += 128) {
-                _ = aegis.enc(ad[i..][0..128]);
+                aegis.absorb(ad[i..][0..128]);
             }
             if (ad.len % 128 != 0) {
                 var pad = [_]u8{0} ** 128;
                 mem.copy(u8, pad[0 .. ad.len % 128], ad[i..]);
-                _ = aegis.enc(&pad);
+                aegis.absorb(&pad);
             }
 
             i = 0;
@@ -237,6 +244,80 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
     };
 }
 
+pub const Aegis128XMac = struct {
+    const Self = @This();
+    const T = Aegis128X;
+
+    pub const mac_length = T.tag_length;
+    pub const key_length = T.key_length;
+    pub const block_length = T.block_length;
+
+    state: T,
+    buf: [block_length]u8 = undefined,
+    off: usize = 0,
+    msg_len: usize = 0,
+
+    /// Initialize a state for the MAC function
+    pub fn init(key: *const [key_length]u8) Self {
+        const nonce = [_]u8{0} ** T.nonce_length;
+        return Self{
+            .state = T.init(key.*, nonce),
+        };
+    }
+
+    /// Add data to the state
+    pub fn update(self: *Self, b: []const u8) void {
+        self.msg_len += b.len;
+
+        const len_partial = @min(b.len, block_length - self.off);
+        mem.copy(u8, self.buf[self.off..][0..len_partial], b[0..len_partial]);
+        self.off += len_partial;
+        if (self.off < block_length) {
+            return;
+        }
+        self.state.absorb(&self.buf);
+
+        var i = len_partial;
+        self.off = 0;
+        while (i + block_length <= b.len) : (i += block_length) {
+            self.state.absorb(b[i..][0..block_length]);
+        }
+        if (i != b.len) {
+            mem.copy(u8, self.buf[0..], b[i..]);
+            self.off = b.len - i;
+        }
+    }
+
+    /// Return an authentication tag for the current state
+    pub fn final(self: *Self, out: *[mac_length]u8) void {
+        if (self.off > 0) {
+            var pad = [_]u8{0} ** block_length;
+            mem.copy(u8, pad[0..], self.buf[0..self.off]);
+            self.state.absorb(&pad);
+        }
+        out.* = self.state.finalize(self.msg_len, 0);
+    }
+
+    /// Return an authentication tag for a message and a key
+    pub fn create(out: *[mac_length]u8, msg: []const u8, key: *const [key_length]u8) void {
+        var ctx = Self.init(key);
+        ctx.update(msg);
+        ctx.final(out);
+    }
+
+    pub const Error = error{};
+    pub const Writer = std.io.Writer(*Self, Error, write);
+
+    fn write(self: *Self, bytes: []const u8) Error!usize {
+        self.update(bytes);
+        return bytes.len;
+    }
+
+    pub fn writer(self: *Self) Writer {
+        return .{ .context = self };
+    }
+};
+
 test "aegis128x" {
     const key = [_]u8{0} ** Aegis128X.key_length;
     const nonce = [_]u8{0} ** Aegis128X.nonce_length;
@@ -247,4 +328,19 @@ test "aegis128x" {
     var msg2 = [_]u8{0} ** msg.len;
     try Aegis128X.decrypt(&msg2, &ct, tag, &ad, key, nonce);
     try std.testing.expectEqualSlices(u8, &msg, &msg2);
+}
+
+test "aegis MAC" {
+    const key = [_]u8{0x00} ** Aegis128XMac.key_length;
+    var msg: [64]u8 = undefined;
+    for (&msg, 0..) |*m, i| {
+        m.* = @truncate(u8, i);
+    }
+    const st_init = Aegis128XMac.init(&key);
+    var st = st_init;
+    var tag: [Aegis128XMac.mac_length]u8 = undefined;
+
+    st.update(msg[0..32]);
+    st.update(msg[32..]);
+    st.final(&tag);
 }
