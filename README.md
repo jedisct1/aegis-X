@@ -63,7 +63,7 @@ OpenSSL 3 AES benchmarks on the same machine:
 
 ### Authentication (MAC)
 
-Zig benchmark:
+Zig benchmark (single core):
 
 ```text
    blake3 (rust/asm):    4570 MiB/s
@@ -93,7 +93,7 @@ OpenSSL 3 AES benchmarks on the same machine:
 
 ### Authentication (MAC)
 
-Zig benchmark:
+Zig benchmark (single core):
 
 ```text
    blake3 (rust/asm):    4900 MiB/s
