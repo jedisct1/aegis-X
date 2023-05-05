@@ -63,8 +63,8 @@ const GenericAesBlockX2 = struct {
 
     pub inline fn toBytes(block: Self) [32]u8 {
         var out: [32]u8 = undefined;
-        mem.copy(u8, out[0..16], &block.repr[0].toBytes());
-        mem.copy(u8, out[16..32], &block.repr[1].toBytes());
+        @memcpy(out[0..16], &block.repr[0].toBytes());
+        @memcpy(out[16..32], &block.repr[1].toBytes());
         return out;
     }
 

@@ -50,14 +50,14 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
             var key1_x2: [32]u8 = undefined;
             var nonce0_x2: [32]u8 = undefined;
             var nonce1_x2: [32]u8 = undefined;
-            mem.copy(u8, key0_x2[0..16], key[0..16]);
-            mem.copy(u8, key0_x2[16..], key[0..16]);
-            mem.copy(u8, key1_x2[0..16], key[16..]);
-            mem.copy(u8, key1_x2[16..], key[16..]);
-            mem.copy(u8, nonce0_x2[0..16], nonce[0..16]);
-            mem.copy(u8, nonce0_x2[16..], nonce[0..16]);
-            mem.copy(u8, nonce1_x2[0..16], nonce[16..]);
-            mem.copy(u8, nonce1_x2[16..], nonce[16..]);
+            @memcpy(key0_x2[0..16], key[0..16]);
+            @memcpy(key0_x2[16..], key[0..16]);
+            @memcpy(key1_x2[0..16], key[16..]);
+            @memcpy(key1_x2[16..], key[16..]);
+            @memcpy(nonce0_x2[0..16], nonce[0..16]);
+            @memcpy(nonce0_x2[16..], nonce[0..16]);
+            @memcpy(nonce1_x2[0..16], nonce[16..]);
+            @memcpy(nonce1_x2[16..], nonce[16..]);
 
             const contexts = AesBlockX2.fromBytes(
                 &[_]u8{0} ++ [_]u8{0} ** 15 ++ // context for first instance is 0
@@ -116,12 +116,12 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
             const s = self.s;
             const z = s[1].xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[2].andBlocks(s[3]));
             var pad = [_]u8{0} ** 32;
-            mem.copy(u8, pad[0..cn.len], cn);
+            @memcpy(pad[0..cn.len], cn);
             const t = AesBlockX2.fromBytes(&pad);
             const out = t.xorBlocks(z);
-            mem.copy(u8, &pad, &out.toBytes());
-            mem.copy(u8, xn, pad[0..cn.len]);
-            mem.set(u8, pad[cn.len..], 0);
+            @memcpy(&pad, &out.toBytes());
+            @memcpy(xn, pad[0..cn.len]);
+            @memset(pad[cn.len..], 0);
             const v = AesBlockX2.fromBytes(&pad);
             self.update(v);
         }
@@ -131,7 +131,7 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
             var b: [32]u8 = undefined;
             mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
             mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
-            mem.copy(u8, b[16..32], b[0..16]);
+            @memcpy(b[16..32], b[0..16]);
             const t = s[3].xorBlocks(AesBlockX2.fromBytes(&b));
             var i: usize = 0;
             while (i < 7) : (i += 1) {
@@ -177,18 +177,18 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
             }
             if (ad.len % 32 != 0) {
                 var pad = [_]u8{0} ** 32;
-                mem.copy(u8, pad[0 .. ad.len % 32], ad[i..]);
+                @memcpy(pad[0 .. ad.len % 32], ad[i..]);
                 _ = aegis.enc(&pad);
             }
 
             i = 0;
             while (i + 32 <= msg.len) : (i += 32) {
-                mem.copy(u8, ct[i..][0..32], &aegis.enc(msg[i..][0..32]));
+                @memcpy(ct[i..][0..32], &aegis.enc(msg[i..][0..32]));
             }
             if (msg.len % 32 != 0) {
                 var pad = [_]u8{0} ** 32;
-                mem.copy(u8, pad[0 .. msg.len % 32], msg[i..]);
-                mem.copy(u8, ct[i..], aegis.enc(&pad)[0 .. msg.len % 32]);
+                @memcpy(pad[0 .. msg.len % 32], msg[i..]);
+                @memcpy(ct[i..], aegis.enc(&pad)[0 .. msg.len % 32]);
             }
 
             return aegis.finalize(ad.len, msg.len);
@@ -213,13 +213,13 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
             }
             if (ad.len % 32 != 0) {
                 var pad = [_]u8{0} ** 32;
-                mem.copy(u8, pad[0 .. ad.len % 32], ad[i..]);
+                @memcpy(pad[0 .. ad.len % 32], ad[i..]);
                 _ = aegis.enc(&pad);
             }
 
             i = 0;
             while (i + 32 <= ct.len) : (i += 32) {
-                mem.copy(u8, msg[i..][0..32], &aegis.dec(ct[i..][0..32]));
+                @memcpy(msg[i..][0..32], &aegis.dec(ct[i..][0..32]));
             }
             if (ct.len % 32 != 0) {
                 aegis.decLast(msg[i..], ct[i..]);

@@ -93,8 +93,8 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             const out1 = t1.xorBlocks(z1);
             self.update(t0, t1);
             var ci: [64]u8 = undefined;
-            mem.copy(u8, ci[0..32], &out0.toBytes());
-            mem.copy(u8, ci[32..64], &out1.toBytes());
+            @memcpy(ci[0..32], &out0.toBytes());
+            @memcpy(ci[32..64], &out1.toBytes());
             return ci;
         }
 
@@ -108,8 +108,8 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             const out1 = t1.xorBlocks(z1);
             self.update(out0, out1);
             var xi: [64]u8 = undefined;
-            mem.copy(u8, xi[0..32], &out0.toBytes());
-            mem.copy(u8, xi[32..64], &out1.toBytes());
+            @memcpy(xi[0..32], &out0.toBytes());
+            @memcpy(xi[32..64], &out1.toBytes());
             return xi;
         }
 
@@ -118,15 +118,15 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             const z0 = s[6].xorBlocks(s[1]).xorBlocks(s[2].andBlocks(s[3]));
             const z1 = s[2].xorBlocks(s[5]).xorBlocks(s[6].andBlocks(s[7]));
             var pad = [_]u8{0} ** 64;
-            mem.copy(u8, pad[0..cn.len], cn);
+            @memcpy(pad[0..cn.len], cn);
             const t0 = AesBlockX2.fromBytes(pad[0..32]);
             const t1 = AesBlockX2.fromBytes(pad[32..64]);
             const out0 = t0.xorBlocks(z0);
             const out1 = t1.xorBlocks(z1);
-            mem.copy(u8, pad[0..32], &out0.toBytes());
-            mem.copy(u8, pad[32..64], &out1.toBytes());
-            mem.copy(u8, xn, pad[0..cn.len]);
-            mem.set(u8, pad[cn.len..], 0);
+            @memcpy(pad[0..32], &out0.toBytes());
+            @memcpy(pad[32..64], &out1.toBytes());
+            @memcpy(xn, pad[0..cn.len]);
+            @memset(pad[cn.len..], 0);
             const v0 = AesBlockX2.fromBytes(pad[0..32]);
             const v1 = AesBlockX2.fromBytes(pad[32..64]);
             self.update(v0, v1);
@@ -137,7 +137,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             var b: [32]u8 = undefined;
             mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
             mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
-            mem.copy(u8, b[16..32], b[0..16]);
+            @memcpy(b[16..32], b[0..16]);
             const t = s[2].xorBlocks(AesBlockX2.fromBytes(&b));
             var i: usize = 0;
             while (i < 7) : (i += 1) {
@@ -183,18 +183,18 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             }
             if (ad.len % 64 != 0) {
                 var pad = [_]u8{0} ** 64;
-                mem.copy(u8, pad[0 .. ad.len % 64], ad[i..]);
+                @memcpy(pad[0 .. ad.len % 64], ad[i..]);
                 aegis.absorb(&pad);
             }
 
             i = 0;
             while (i + 64 <= msg.len) : (i += 64) {
-                mem.copy(u8, ct[i..][0..64], &aegis.enc(msg[i..][0..64]));
+                @memcpy(ct[i..][0..64], &aegis.enc(msg[i..][0..64]));
             }
             if (msg.len % 64 != 0) {
                 var pad = [_]u8{0} ** 64;
-                mem.copy(u8, pad[0 .. msg.len % 64], msg[i..]);
-                mem.copy(u8, ct[i..], aegis.enc(&pad)[0 .. msg.len % 64]);
+                @memcpy(pad[0 .. msg.len % 64], msg[i..]);
+                @memcpy(ct[i..], aegis.enc(&pad)[0 .. msg.len % 64]);
             }
 
             return aegis.finalize(ad.len, msg.len);
@@ -219,13 +219,13 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             }
             if (ad.len % 64 != 0) {
                 var pad = [_]u8{0} ** 64;
-                mem.copy(u8, pad[0 .. ad.len % 64], ad[i..]);
+                @memcpy(pad[0 .. ad.len % 64], ad[i..]);
                 aegis.absorb(&pad);
             }
 
             i = 0;
             while (i + 64 <= ct.len) : (i += 64) {
-                mem.copy(u8, msg[i..][0..64], &aegis.dec(ct[i..][0..64]));
+                @memcpy(msg[i..][0..64], &aegis.dec(ct[i..][0..64]));
             }
             if (ct.len % 64 != 0) {
                 aegis.decLast(msg[i..], ct[i..]);
@@ -266,7 +266,7 @@ pub const Aegis128XMac = struct {
         self.msg_len += b.len;
 
         const len_partial = @min(b.len, block_length - self.off);
-        mem.copy(u8, self.buf[self.off..][0..len_partial], b[0..len_partial]);
+        @memcpy(self.buf[self.off..][0..len_partial], b[0..len_partial]);
         self.off += len_partial;
         if (self.off < block_length) {
             return;
@@ -279,7 +279,7 @@ pub const Aegis128XMac = struct {
             self.state.absorb(b[i..][0..block_length]);
         }
         if (i != b.len) {
-            mem.copy(u8, self.buf[0..], b[i..]);
+            @memcpy(self.buf[0..], b[i..]);
             self.off = b.len - i;
         }
     }
@@ -288,7 +288,7 @@ pub const Aegis128XMac = struct {
     pub fn final(self: *Self, out: *[mac_length]u8) void {
         if (self.off > 0) {
             var pad = [_]u8{0} ** block_length;
-            mem.copy(u8, pad[0..], self.buf[0..self.off]);
+            @memcpy(pad[0..], self.buf[0..self.off]);
             self.state.absorb(&pad);
         }
         out.* = self.state.finalize(self.msg_len, 0);
