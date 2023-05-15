@@ -4,7 +4,7 @@ const crypto = std.crypto;
 const mem = std.mem;
 const AuthenticationError = std.crypto.errors.AuthenticationError;
 
-const AesBlockX4 = @import("aes_block_x4.zig").AesBlockX4;
+const AesBlockX2 = @import("aes_block_x2.zig").AesBlockX2;
 
 pub const Aegis128X = Aegis128Xt(128);
 pub const Aegis128X_256 = Aegis128Xt(256);
@@ -14,7 +14,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
     return struct {
         const Self = @This();
-        pub const block_length: usize = 128;
+        pub const block_length: usize = 64;
         pub const key_length: usize = 16;
         pub const nonce_length: usize = 16;
         pub const tag_length: usize = 16;
@@ -22,15 +22,15 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
         pub const msg_max_length: usize = 1 << 61;
         pub const ct_max_length: usize = msg_max_length + tag_length;
 
-        const State = [8]AesBlockX4;
+        const State = [8]AesBlockX2;
 
         s: State,
 
-        inline fn aesround(in: AesBlockX4, rk: AesBlockX4) AesBlockX4 {
+        inline fn aesround(in: AesBlockX2, rk: AesBlockX2) AesBlockX2 {
             return in.encrypt(rk);
         }
 
-        fn update(self: *Aegis128X, m0: AesBlockX4, m1: AesBlockX4) void {
+        fn update(self: *Aegis128X, m0: AesBlockX2, m1: AesBlockX2) void {
             const s = self.s;
             self.s = State{
                 aesround(s[7], s[0].xorBlocks(m0)),
@@ -45,19 +45,17 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
         }
 
         fn init(key: [key_length]u8, nonce: [nonce_length]u8) Self {
-            const c0 = AesBlockX4.fromBytes(&[16]u8{ 0x0, 0x1, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0d, 0x15, 0x22, 0x37, 0x59, 0x90, 0xe9, 0x79, 0x62 } ** 4);
-            const c1 = AesBlockX4.fromBytes(&[16]u8{ 0xdb, 0x3d, 0x18, 0x55, 0x6d, 0xc2, 0x2f, 0xf1, 0x20, 0x11, 0x31, 0x42, 0x73, 0xb5, 0x28, 0xdd } ** 4);
+            const c0 = AesBlockX2.fromBytes(&[16]u8{ 0x0, 0x1, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0d, 0x15, 0x22, 0x37, 0x59, 0x90, 0xe9, 0x79, 0x62 } ** 2);
+            const c1 = AesBlockX2.fromBytes(&[16]u8{ 0xdb, 0x3d, 0x18, 0x55, 0x6d, 0xc2, 0x2f, 0xf1, 0x20, 0x11, 0x31, 0x42, 0x73, 0xb5, 0x28, 0xdd } ** 2);
 
-            const key_x4 = key ** 4;
-            const nonce_x4 = nonce ** 4;
-            const key_block = AesBlockX4.fromBytes(&key_x4);
-            const nonce_block = AesBlockX4.fromBytes(&nonce_x4);
+            const key_x2 = key ** 2;
+            const nonce_x2 = nonce ** 2;
+            const key_block = AesBlockX2.fromBytes(&key_x2);
+            const nonce_block = AesBlockX2.fromBytes(&nonce_x2);
 
-            const contexts = AesBlockX4.fromBytes(
+            const contexts = AesBlockX2.fromBytes(
                 &[_]u8{0} ++ [_]u8{0} ** 15 ++ // context for first instance is 0
-                    [_]u8{1} ++ [_]u8{0} ** 15 ++ // context for second instance is 1
-                    [_]u8{2} ++ [_]u8{0} ** 15 ++ // context for second instance is 2
-                    [_]u8{3} ++ [_]u8{0} ** 15, // context for second instance is 3
+                    [_]u8{1} ++ [_]u8{0} ** 15, // context for second instance is 1
             );
 
             var self = Self{ .s = State{
@@ -79,39 +77,39 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             return self;
         }
 
-        fn absorb(state: *Self, src: *const [128]u8) void {
-            const msg0 = AesBlockX4.fromBytes(src[0..64]);
-            const msg1 = AesBlockX4.fromBytes(src[64..128]);
+        fn absorb(state: *Self, src: *const [64]u8) void {
+            const msg0 = AesBlockX2.fromBytes(src[0..32]);
+            const msg1 = AesBlockX2.fromBytes(src[32..64]);
             state.update(msg0, msg1);
         }
 
-        fn enc(self: *Self, xi: *const [128]u8) [128]u8 {
+        fn enc(self: *Self, xi: *const [64]u8) [64]u8 {
             const s = &self.s;
             const z0 = s[6].xorBlocks(s[1]).xorBlocks(s[2].andBlocks(s[3]));
             const z1 = s[2].xorBlocks(s[5]).xorBlocks(s[6].andBlocks(s[7]));
-            const t0 = AesBlockX4.fromBytes(xi[0..64]);
-            const t1 = AesBlockX4.fromBytes(xi[64..128]);
+            const t0 = AesBlockX2.fromBytes(xi[0..32]);
+            const t1 = AesBlockX2.fromBytes(xi[32..64]);
             const out0 = t0.xorBlocks(z0);
             const out1 = t1.xorBlocks(z1);
             self.update(t0, t1);
-            var ci: [128]u8 = undefined;
-            @memcpy(ci[0..64], &out0.toBytes());
-            @memcpy(ci[64..128], &out1.toBytes());
+            var ci: [64]u8 = undefined;
+            @memcpy(ci[0..32], &out0.toBytes());
+            @memcpy(ci[32..64], &out1.toBytes());
             return ci;
         }
 
-        fn dec(self: *Self, ci: *const [128]u8) [128]u8 {
+        fn dec(self: *Self, ci: *const [64]u8) [64]u8 {
             const s = &self.s;
             const z0 = s[6].xorBlocks(s[1]).xorBlocks(s[2].andBlocks(s[3]));
             const z1 = s[2].xorBlocks(s[5]).xorBlocks(s[6].andBlocks(s[7]));
-            const t0 = AesBlockX4.fromBytes(ci[0..64]);
-            const t1 = AesBlockX4.fromBytes(ci[64..128]);
+            const t0 = AesBlockX2.fromBytes(ci[0..32]);
+            const t1 = AesBlockX2.fromBytes(ci[32..64]);
             const out0 = t0.xorBlocks(z0);
             const out1 = t1.xorBlocks(z1);
             self.update(out0, out1);
-            var xi: [128]u8 = undefined;
-            @memcpy(xi[0..64], &out0.toBytes());
-            @memcpy(xi[64..128], &out1.toBytes());
+            var xi: [64]u8 = undefined;
+            @memcpy(xi[0..32], &out0.toBytes());
+            @memcpy(xi[32..64], &out1.toBytes());
             return xi;
         }
 
@@ -119,30 +117,28 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             const s = &self.s;
             const z0 = s[6].xorBlocks(s[1]).xorBlocks(s[2].andBlocks(s[3]));
             const z1 = s[2].xorBlocks(s[5]).xorBlocks(s[6].andBlocks(s[7]));
-            var pad = [_]u8{0} ** 128;
+            var pad = [_]u8{0} ** 64;
             @memcpy(pad[0..cn.len], cn);
-            const t0 = AesBlockX4.fromBytes(pad[0..64]);
-            const t1 = AesBlockX4.fromBytes(pad[64..128]);
+            const t0 = AesBlockX2.fromBytes(pad[0..32]);
+            const t1 = AesBlockX2.fromBytes(pad[32..64]);
             const out0 = t0.xorBlocks(z0);
             const out1 = t1.xorBlocks(z1);
-            @memcpy(pad[0..64], &out0.toBytes());
-            @memcpy(pad[64..128], &out1.toBytes());
+            @memcpy(pad[0..32], &out0.toBytes());
+            @memcpy(pad[32..64], &out1.toBytes());
             @memcpy(xn, pad[0..cn.len]);
             @memset(pad[cn.len..], 0);
-            const v0 = AesBlockX4.fromBytes(pad[0..64]);
-            const v1 = AesBlockX4.fromBytes(pad[64..128]);
+            const v0 = AesBlockX2.fromBytes(pad[0..32]);
+            const v1 = AesBlockX2.fromBytes(pad[32..64]);
             self.update(v0, v1);
         }
 
         fn finalize(self: *Self, ad_len: usize, msg_len: usize) [tag_length]u8 {
             var s = &self.s;
-            var b: [64]u8 = undefined;
+            var b: [32]u8 = undefined;
             mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
             mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
             @memcpy(b[16..32], b[0..16]);
-            @memcpy(b[32..48], b[0..16]);
-            @memcpy(b[48..64], b[0..16]);
-            const t = s[2].xorBlocks(AesBlockX4.fromBytes(&b));
+            const t = s[2].xorBlocks(AesBlockX2.fromBytes(&b));
             var i: usize = 0;
             while (i < 7) : (i += 1) {
                 self.update(t, t);
@@ -152,7 +148,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
                     .xorBlocks(s[4]).xorBlocks(s[5]).xorBlocks(s[6]).toBytes();
                 var tag: [tag_length]u8 = undefined;
                 for (tag, 0..) |_, j| {
-                    tag[j] = tag32[j] ^ tag32[j + 16] ^ tag32[j + 32] ^ tag32[j + 48];
+                    tag[j] = tag32[j] ^ tag32[j + 16];
                 }
                 return tag;
             } else {
@@ -160,10 +156,10 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
                 const tag32_1 = s[4].xorBlocks(s[5]).xorBlocks(s[6]).xorBlocks(s[7]).toBytes();
                 var tag: [tag_length]u8 = undefined;
                 for (tag[0 .. tag_length / 2], 0..) |_, j| {
-                    tag[j] = tag32_0[j] ^ tag32_0[j + 16] ^ tag32_0[j + 32] ^ tag32_0[j + 48];
+                    tag[j] = tag32_0[j] ^ tag32_0[j + 16];
                 }
                 for (tag[tag_length / 2 ..], 0..) |_, j| {
-                    tag[tag_length / 2 + j] = tag32_1[j] ^ tag32_1[j + 16] ^ tag32_1[j + 32] ^ tag32_1[j + 48];
+                    tag[tag_length / 2 + j] = tag32_1[j] ^ tag32_1[j + 16];
                 }
                 return tag;
             }
@@ -182,23 +178,24 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             var aegis = init(key, nonce);
 
             var i: usize = 0;
-            while (i + 128 <= ad.len) : (i += 128) {
-                aegis.absorb(ad[i..][0..128]);
+            while (i + 64 <= ad.len) : (i += 64) {
+                aegis.absorb(ad[i..][0..64]);
             }
-            if (ad.len % 128 != 0) {
-                var pad = [_]u8{0} ** 128;
-                @memcpy(pad[0 .. ad.len % 128], ad[i..]);
+            if (ad.len % 64 != 0) {
+                var pad = [_]u8{0} ** 64;
+                @memcpy(pad[0 .. ad.len % 64], ad[i..]);
                 aegis.absorb(&pad);
             }
 
             i = 0;
-            while (i + 128 <= msg.len) : (i += 128) {
-                @memcpy(ct[i..][0..128], &aegis.enc(msg[i..][0..128]));
+            while (i + 64 <= msg.len) : (i += 64) {
+                @memcpy(ct[i..][0..64], &aegis.enc(msg[i..][0..64]));
             }
-            if (msg.len % 128 != 0) {
-                var pad = [_]u8{0} ** 128;
-                @memcpy(pad[0 .. msg.len % 128], msg[i..]);
-                @memcpy(ct[i..], aegis.enc(&pad)[0 .. msg.len % 128]);
+            if (msg.len % 64 != 0) {
+                var pad = [_]u8{0} ** 64;
+                @memcpy(pad[0 .. msg.len % 64], msg[i..]);
+                const ks = aegis.enc(&pad);
+                @memcpy(ct[i..], ks[0 .. msg.len % 64]);
             }
 
             return aegis.finalize(ad.len, msg.len);
@@ -218,20 +215,20 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
             var aegis = init(key, nonce);
 
             var i: usize = 0;
-            while (i + 128 <= ad.len) : (i += 128) {
-                aegis.absorb(ad[i..][0..128]);
+            while (i + 64 <= ad.len) : (i += 64) {
+                aegis.absorb(ad[i..][0..64]);
             }
-            if (ad.len % 128 != 0) {
-                var pad = [_]u8{0} ** 128;
-                @memcpy(pad[0 .. ad.len % 128], ad[i..]);
+            if (ad.len % 64 != 0) {
+                var pad = [_]u8{0} ** 64;
+                @memcpy(pad[0 .. ad.len % 64], ad[i..]);
                 aegis.absorb(&pad);
             }
 
             i = 0;
-            while (i + 128 <= ct.len) : (i += 128) {
-                @memcpy(msg[i..][0..128], &aegis.dec(ct[i..][0..128]));
+            while (i + 64 <= ct.len) : (i += 64) {
+                @memcpy(msg[i..][0..64], &aegis.dec(ct[i..][0..64]));
             }
-            if (ct.len % 128 != 0) {
+            if (ct.len % 64 != 0) {
                 aegis.decLast(msg[i..], ct[i..]);
             }
 
@@ -325,6 +322,24 @@ test "aegis128x" {
     const msg = [_]u8{0} ** 64;
     var ct = [_]u8{0} ** msg.len;
     const tag = Aegis128X.encrypt(&ct, &msg, &ad, key, nonce);
+    var msg2 = [_]u8{0} ** msg.len;
+    try Aegis128X.decrypt(&msg2, &ct, tag, &ad, key, nonce);
+    try std.testing.expectEqualSlices(u8, &msg, &msg2);
+}
+
+test "test vector" {
+    const key = [_]u8{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    const nonce = [_]u8{ 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+    const ad = [_]u8{ 1, 2, 3, 4 } ** 2;
+    const msg = [_]u8{ 4, 5, 6, 7 } ** 3;
+    var ct = [_]u8{0} ** msg.len;
+    const tag = Aegis128X.encrypt(&ct, &msg, &ad, key, nonce);
+    std.debug.print("Key: {s}\n", .{std.fmt.bytesToHex(key, .lower)});
+    std.debug.print("IV: {s}\n", .{std.fmt.bytesToHex(nonce, .lower)});
+    std.debug.print("AD: {s}\n", .{std.fmt.bytesToHex(ad, .lower)});
+    std.debug.print("Plaintext: {s}\n", .{std.fmt.bytesToHex(msg, .lower)});
+    std.debug.print("Ciphertext: {s}\n", .{std.fmt.bytesToHex(ct, .lower)});
+    std.debug.print("128-bit tag: {s}\n", .{std.fmt.bytesToHex(tag, .lower)});
     var msg2 = [_]u8{0} ** msg.len;
     try Aegis128X.decrypt(&msg2, &ct, tag, &ad, key, nonce);
     try std.testing.expectEqualSlices(u8, &msg, &msg2);
