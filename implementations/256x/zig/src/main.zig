@@ -129,8 +129,8 @@ fn Aegis256Xt(comptime tag_bits: u9) type {
         fn finalize(self: *Self, ad_len: usize, msg_len: usize) [tag_length]u8 {
             var s = &self.s;
             var b: [32]u8 = undefined;
-            mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
-            mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
+            mem.writeIntLittle(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8);
+            mem.writeIntLittle(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8);
             @memcpy(b[16..32], b[0..16]);
             const t = s[3].xorBlocks(AesBlockX2.fromBytes(&b));
             var i: usize = 0;

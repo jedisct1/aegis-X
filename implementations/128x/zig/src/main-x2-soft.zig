@@ -41,7 +41,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
             var aegis_lanes: [lanes]Aegis128X1 = undefined;
             for (0..lanes) |lane| {
-                aegis_lanes[lane] = Aegis128X1.init(key, nonce, @intCast(u8, lane));
+                aegis_lanes[lane] = Aegis128X1.init(key, nonce, @as(u8, @intCast(lane)));
             }
             for (0..lanes) |lane| {
                 var aegis = &aegis_lanes[lane];
@@ -109,7 +109,7 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
 
             var aegis_lanes: [lanes]Aegis128X1 = undefined;
             for (0..lanes) |lane| {
-                aegis_lanes[lane] = Aegis128X1.init(key, nonce, @intCast(u8, lane));
+                aegis_lanes[lane] = Aegis128X1.init(key, nonce, @as(u8, @intCast(lane)));
             }
 
             for (0..lanes) |lane| {
@@ -277,8 +277,8 @@ fn Aegis128L(comptime tag_bits: u9) type {
         fn finalize(self: *Self, ad_len: usize, msg_len: usize) [tag_length]u8 {
             var s = &self.s;
             var b: [16]u8 = undefined;
-            mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
-            mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
+            mem.writeIntLittle(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8);
+            mem.writeIntLittle(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8);
             const t = s[2].xorBlocks(AesBlock.fromBytes(&b));
             var i: usize = 0;
             while (i < 7) : (i += 1) {

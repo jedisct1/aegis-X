@@ -137,8 +137,8 @@ fn Aegis128Xt(comptime tag_bits: u9) type {
         fn finalize(self: *Self, ad_len: usize, msg_len: usize) [tag_length]u8 {
             var s = &self.s;
             var b: [64]u8 = undefined;
-            mem.writeIntLittle(u64, b[0..8], @intCast(u64, ad_len) * 8);
-            mem.writeIntLittle(u64, b[8..16], @intCast(u64, msg_len) * 8);
+            mem.writeIntLittle(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8);
+            mem.writeIntLittle(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8);
             @memcpy(b[16..32], b[0..16]);
             @memcpy(b[32..48], b[0..16]);
             @memcpy(b[48..64], b[0..16]);
@@ -334,7 +334,7 @@ test "aegis MAC" {
     const key = [_]u8{0x00} ** Aegis128XMac.key_length;
     var msg: [64]u8 = undefined;
     for (&msg, 0..) |*m, i| {
-        m.* = @truncate(u8, i);
+        m.* = @as(u8, @truncate(i));
     }
     const st_init = Aegis128XMac.init(&key);
     var st = st_init;
