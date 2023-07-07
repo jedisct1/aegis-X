@@ -5,12 +5,14 @@
 - [Benchmarks](#benchmarks)
     - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
   - [Ryzen 7 7700](#ryzen-7-7700)
-  - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
     - [Encryption](#encryption)
     - [Authentication (MAC)](#authentication-mac)
-  - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
+  - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
     - [Encryption](#encryption-1)
     - [Authentication (MAC)](#authentication-mac-1)
+  - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
+    - [Encryption](#encryption-2)
+    - [Authentication (MAC)](#authentication-mac-2)
 
 AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
 
@@ -44,6 +46,8 @@ OpenSSL 3 AES benchmarks on the same machine:
 
 ## Ryzen 7 7700
 
+### Encryption
+
 BoringSSL benchmark (16K blocks):
 
 ```text
@@ -62,6 +66,14 @@ BoringSSL benchmark (16K blocks):
         aegis-256:      12055 MiB/s
        aes256-ocb:       7143 MiB/s
        aes256-gcm:       4649 MiB/s
+```
+
+### Authentication (MAC)
+
+```text
+      aegis-128x4:      53573 MiB/s
+      aegis-128x2:      45821 MiB/s
+       aegis-128l:      19514 MiB/s
 ```
 
 ## Zig CI server - Ryzen 9
