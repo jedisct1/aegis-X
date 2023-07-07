@@ -60,6 +60,8 @@ BoringSSL benchmark (16K blocks):
       aegis-256x4:      35521 MiB/s
       aegis-256x2:      23555 MiB/s
         aegis-256:      12055 MiB/s
+       aes256-ocb:       7143 MiB/s
+       aes256-gcm:       4649 MiB/s
 ```
 
 ## Zig CI server - Ryzen 9
