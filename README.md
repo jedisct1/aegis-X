@@ -44,14 +44,22 @@ OpenSSL 3 AES benchmarks on the same machine:
 
 ## Ryzen 7 7700
 
-BoringSSL benchmark (16 K blocks):
+BoringSSL benchmark (16K blocks):
 
 ```text
       aegis-128x4:      44654 MiB/s
-       aegis-128x:      39707 MiB/s
+      aegis-128x2:      39707 MiB/s
        aegis-128l:      19514 MiB/s
        aes128-ocb:      10195 MiB/s
        aes128-gcm:       4940 MiB/s
+```
+
+256-bit variants:
+
+```text
+      aegis-256x4:      35521 MiB/s
+      aegis-256x2:      23555 MiB/s
+        aegis-256:      12055 MiB/s
 ```
 
 ## Zig CI server - Ryzen 9
