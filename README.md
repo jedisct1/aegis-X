@@ -4,6 +4,7 @@
 - [Specification and rationale](#specification-and-rationale)
 - [Benchmarks](#benchmarks)
     - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
+  - [Ryzen 7 7700](#ryzen-7-7700)
   - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
     - [Encryption](#encryption)
     - [Authentication (MAC)](#authentication-mac)
@@ -39,6 +40,18 @@ OpenSSL 3 AES benchmarks on the same machine:
        aes128-ocb:       16013 MiB/s
        aes256-ocb:       11520 MiB/s
        aes128-gcm:       10243 MiB/s
+```
+
+## Ryzen 7 7700
+
+BoringSSL benchmark (16 K blocks):
+
+```text
+      aegis-128x4:      44654 MiB/s
+       aegis-128x:      39707 MiB/s
+       aegis-128l:      19514 MiB/s
+       aes128-ocb:      10195 MiB/s
+       aes128-gcm:       4940 MiB/s
 ```
 
 ## Zig CI server - Ryzen 9
