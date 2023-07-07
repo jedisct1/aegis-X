@@ -3,10 +3,10 @@
 - [AEGIS-128X and AEGIS-256X](#aegis-128x-and-aegis-256x)
 - [Specification and rationale](#specification-and-rationale)
 - [Benchmarks](#benchmarks)
-    - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
   - [Ryzen 7 7700](#ryzen-7-7700)
     - [Encryption](#encryption)
     - [Authentication (MAC)](#authentication-mac)
+    - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
   - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
     - [Encryption](#encryption-1)
     - [Authentication (MAC)](#authentication-mac-1)
@@ -23,26 +23,6 @@ AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenti
 # Benchmarks
 
 AEGIS-128X has exceptional performance, even without AVX512.
-
-Results for a 2-way variant, requiring AVX2 only:
-
-### Intel i9-13900k (thanks to @watzon)
-
-Zig benchmark:
-
-```text
-       aegis-128x:      39781 MiB/s
-       aegis-128l:      23863 MiB/s
-        aegis-256:      12077 MiB/s
-```
-
-OpenSSL 3 AES benchmarks on the same machine:
-
-```text
-       aes128-ocb:       16013 MiB/s
-       aes256-ocb:       11520 MiB/s
-       aes128-gcm:       10243 MiB/s
-```
 
 ## Ryzen 7 7700
 
@@ -76,7 +56,29 @@ BoringSSL benchmark (16K blocks):
        aegis-128l:      19514 MiB/s
 ```
 
+### Intel i9-13900k (thanks to @watzon)
+
+Results for a 2-way variant, requiring AVX2 only:
+
+Zig benchmark:
+
+```text
+       aegis-128x:      39781 MiB/s
+       aegis-128l:      23863 MiB/s
+        aegis-256:      12077 MiB/s
+```
+
+OpenSSL 3 AES benchmarks on the same machine:
+
+```text
+       aes128-ocb:       16013 MiB/s
+       aes256-ocb:       11520 MiB/s
+       aes128-gcm:       10243 MiB/s
+```
+
 ## Zig CI server - Ryzen 9
+
+Results for a 2-way variant, requiring AVX2 only:
 
 ### Encryption
 
@@ -107,6 +109,8 @@ Zig benchmark (single core):
 ```
 
 ## Scaleway EPYC 7543 instance
+
+Results for a 2-way variant, requiring AVX2 only:
 
 ### Encryption
 
