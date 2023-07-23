@@ -83,8 +83,7 @@ fn Aegis256_(comptime degree: u7, comptime tag_bits: u9) type {
                 k0.xorBlocks(c0),
                 k1.xorBlocks(c1),
             } };
-            var i: usize = 0;
-            while (i < 4) : (i += 1) {
+            for (0..4) |_| {
                 self.s[3] = self.s[3].xorBlocks(contexts);
                 self.s[5] = self.s[5].xorBlocks(contexts);
                 self.update(k0);

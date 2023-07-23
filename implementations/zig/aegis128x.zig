@@ -84,8 +84,7 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
                 key_block.xorBlocks(c1),
                 key_block.xorBlocks(c0),
             } };
-            var i: usize = 0;
-            while (i < 10) : (i += 1) {
+            for (0..10) |_| {
                 self.s[3] = self.s[3].xorBlocks(contexts);
                 self.s[7] = self.s[7].xorBlocks(contexts);
                 self.update(nonce_block, key_block);
