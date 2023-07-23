@@ -142,7 +142,7 @@ fn Aegis256_(comptime degree: u7, comptime tag_bits: u9) type {
             var b: [blockx_length]u8 = undefined;
             mem.writeIntLittle(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8);
             mem.writeIntLittle(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8);
-            inline for (1..degree) |i| {
+            for (1..degree) |i| {
                 @memcpy(b[i * 16 ..][0..16], b[0..16]);
             }
             const t = s[3].xorBlocks(AesBlockX.fromBytes(&b));
