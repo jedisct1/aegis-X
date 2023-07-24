@@ -19,7 +19,7 @@ pub const Aegis256X4_256 = Aegis256_(4, 256);
 // This is the native representation when using VAES instructions with 256 bit vectors.
 // That can be generalized to other degrees.
 //
-// The following AEGIS-256 implementation is pretty much identical to the AEGIS-256
+// The following AEGIS-256X implementation is pretty much identical to the AEGIS-256
 // one, the main difference being that `AesBlock` (a single AES block) is replaced with
 // `AesBlockX` (a vector of `degree` AES blocks).
 
