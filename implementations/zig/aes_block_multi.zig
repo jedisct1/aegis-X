@@ -1,3 +1,10 @@
+//! AES block operations on vectors of 128-bit blocks.
+//!
+//! This is only used by AEGIS-128X and AEGIS-256X.
+//!
+//! Uses Intel VAES instructions when available, and falls back to
+//! a slow generic implementation otherwise.
+
 const std = @import("std");
 const builtin = @import("builtin");
 const crypto = std.crypto;
@@ -7,7 +14,7 @@ const has_vaes = builtin.cpu.arch == .x86_64 and std.Target.x86.featureSetHas(bu
 const has_avx512f = builtin.cpu.arch == .x86_64 and std.Target.x86.featureSetHas(builtin.cpu.features, .avx512f);
 
 pub fn AesBlockMulti(comptime degree: u7) type {
-    const IntelAesBlockX = struct {
+    const IntelAesBlockMulti = struct {
         const Self = @This();
         const BlockVec = @Vector(degree * 2, u64);
         repr: BlockVec,
@@ -48,7 +55,7 @@ pub fn AesBlockMulti(comptime degree: u7) type {
         }
     };
 
-    const GenericAesBlockX = struct {
+    const GenericAesBlockMulti = struct {
         const Self = @This();
         const BlockVec = crypto.core.aes.Block;
         repr: [degree]BlockVec,
@@ -105,8 +112,8 @@ pub fn AesBlockMulti(comptime degree: u7) type {
     };
 
     if (has_vaes) {
-        if (degree == 2) return IntelAesBlockX;
-        if (degree == 4 and has_avx512f) return IntelAesBlockX;
+        if (degree == 2) return IntelAesBlockMulti;
+        if (degree == 4 and has_avx512f) return IntelAesBlockMulti;
     }
-    return GenericAesBlockX;
+    return GenericAesBlockMulti;
 }

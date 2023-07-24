@@ -2,6 +2,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const crypto = std.crypto;
 const mem = std.mem;
+const AesBlockMulti = @import("aes_block_multi.zig").AesBlockMulti;
 const AuthenticationError = std.crypto.errors.AuthenticationError;
 
 pub const Aegis128X2 = Aegis128X_(2, 128);
@@ -36,7 +37,7 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
         pub const msg_max_length = 1 << 61;
         pub const ct_max_length = msg_max_length + tag_length;
 
-        const AesBlockX = @import("aes_block_multi.zig").AesBlockMulti(degree);
+        const AesBlockX = AesBlockMulti(degree);
         const blockx_length = AesBlockX.block_length;
         const rate = blockx_length * 2;
 

@@ -37,7 +37,7 @@ fn Aegis256_(comptime degree: u7, comptime tag_bits: u9) type {
         pub const msg_max_length = 1 << 61;
         pub const ct_max_length = msg_max_length + tag_length;
 
-        const AesBlockX = @import("aes_block_multi.zig").AesBlockMulti(degree);
+        const AesBlockX = AesBlockMulti(degree);
         const blockx_length = AesBlockX.block_length;
         const rate = blockx_length;
 
