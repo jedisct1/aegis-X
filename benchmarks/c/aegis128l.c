@@ -23,7 +23,7 @@
 // https://datatracker.ietf.org/doc/draft-irtf-cfrg-aegis-aead/
 //
 // Reference implementation:
-// https://github.com/jedisct1/draft-aegis-aead/tree/main/reference-implementations
+// https://github.com/cfrg/draft-irtf-cfrg-aegis-aead/tree/main/reference-implementations
 
 #include <errno.h>
 #include <stdint.h>
