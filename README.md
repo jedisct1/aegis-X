@@ -13,12 +13,15 @@
   - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
     - [Encryption](#encryption-2)
     - [Authentication (MAC)](#authentication-mac-2)
+- [Other implementations](#other-implementations)
 
 AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
 
 # Specification and rationale
 
-[Adding more parallelism to the AEGIS authenticated encryption algorithms](https://eprint.iacr.org/2023/523)
+AEGIS-128X and AEGIS-256X are now included in the [AEGIS specification](https://cfrg.github.io/draft-irtf-cfrg-aegis-aead/draft-irtf-cfrg-aegis-aead.html).
+
+Rtionale: [Adding more parallelism to the AEGIS authenticated encryption algorithms](https://eprint.iacr.org/2023/523)
 
 # Benchmarks
 
@@ -143,3 +146,7 @@ Zig benchmark (single core):
 Given that the `AESENC` instruction has the same latency/throughput regardless of the register size, one can expect AEGIS-128X to be about 4x the speed of AEGIS-128L on server-class CPUs with VAES and AVX512.
 
 However, we may already be hitting memory bandwidth limits.
+
+# Other implementations
+
+- [libaegis](https://github.com/jedisct1/libaegis) is a library written in C, with support for all the AEGIS variants, including AEGIS-X.
