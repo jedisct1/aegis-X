@@ -64,31 +64,31 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
         }
 
         fn init(key: [key_length]u8, nonce: [nonce_length]u8) Self {
-            const c0 = AesBlockX.fromBytes(&[16]u8{ 0x00, 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0d, 0x15, 0x22, 0x37, 0x59, 0x90, 0xe9, 0x79, 0x62 } ** degree);
-            const c1 = AesBlockX.fromBytes(&[16]u8{ 0xdb, 0x3d, 0x18, 0x55, 0x6d, 0xc2, 0x2f, 0xf1, 0x20, 0x11, 0x31, 0x42, 0x73, 0xb5, 0x28, 0xdd } ** degree);
-            const key_block = AesBlockX.fromBytes(&(key ** degree));
-            const nonce_block = AesBlockX.fromBytes(&(nonce ** degree));
-            const contexts = ctx: {
+            const c0_v = AesBlockX.fromBytes(&[16]u8{ 0x00, 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0d, 0x15, 0x22, 0x37, 0x59, 0x90, 0xe9, 0x79, 0x62 } ** degree);
+            const c1_v = AesBlockX.fromBytes(&[16]u8{ 0xdb, 0x3d, 0x18, 0x55, 0x6d, 0xc2, 0x2f, 0xf1, 0x20, 0x11, 0x31, 0x42, 0x73, 0xb5, 0x28, 0xdd } ** degree);
+            const key_v = AesBlockX.fromBytes(&(key ** degree));
+            const nonce_v = AesBlockX.fromBytes(&(nonce ** degree));
+            const ctx_v = ctx_v: {
                 var contexts_bytes = [_]u8{0} ** blockx_length;
-                for (1..degree) |i| {
+                for (0..degree) |i| {
                     contexts_bytes[i * 16] = @intCast(i);
                 }
-                break :ctx AesBlockX.fromBytes(&contexts_bytes);
+                break :ctx_v AesBlockX.fromBytes(&contexts_bytes);
             };
             var self = Self{ .s = State{
-                key_block.xorBlocks(nonce_block),
-                c1,
-                c0,
-                c1,
-                key_block.xorBlocks(nonce_block),
-                key_block.xorBlocks(c0),
-                key_block.xorBlocks(c1),
-                key_block.xorBlocks(c0),
+                key_v.xorBlocks(nonce_v),
+                c1_v,
+                c0_v,
+                c1_v,
+                key_v.xorBlocks(nonce_v),
+                key_v.xorBlocks(c0_v),
+                key_v.xorBlocks(c1_v),
+                key_v.xorBlocks(c0_v),
             } };
             for (0..10) |_| {
-                self.s[3] = self.s[3].xorBlocks(contexts);
-                self.s[7] = self.s[7].xorBlocks(contexts);
-                self.update(nonce_block, key_block);
+                self.s[3] = self.s[3].xorBlocks(ctx_v);
+                self.s[7] = self.s[7].xorBlocks(ctx_v);
+                self.update(nonce_v, key_v);
             }
             return self;
         }
@@ -254,6 +254,25 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
             if (!crypto.utils.timingSafeEql([expected_tag.len]u8, expected_tag, tag)) {
                 crypto.utils.secureZero(u8, msg);
                 return error.AuthenticationFailed;
+            }
+        }
+
+        pub fn stream(
+            out: []u8,
+            key: [key_length]u8,
+            nonce: ?[nonce_length]u8,
+        ) void {
+            assert(out.len <= msg_max_length);
+            var aegis = init(key, nonce orelse [_]u8{0} ** nonce_length);
+
+            const zero = [_]u8{0} ** rate;
+
+            var i: usize = 0;
+            while (i + rate <= out.len) : (i += rate) {
+                @memcpy(out[i..][0..rate], &aegis.enc(&zero));
+            }
+            if (out.len % rate != 0) {
+                @memcpy(out[i..], aegis.enc(&zero)[0 .. out.len % rate]);
             }
         }
     };
