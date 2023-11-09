@@ -21,7 +21,7 @@ AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenti
 
 AEGIS-128X and AEGIS-256X are now included in the [AEGIS specification](https://cfrg.github.io/draft-irtf-cfrg-aegis-aead/draft-irtf-cfrg-aegis-aead.html).
 
-Rtionale: [Adding more parallelism to the AEGIS authenticated encryption algorithms](https://eprint.iacr.org/2023/523)
+Rationale: [Adding more parallelism to the AEGIS authenticated encryption algorithms](https://eprint.iacr.org/2023/523)
 
 # Benchmarks
 
