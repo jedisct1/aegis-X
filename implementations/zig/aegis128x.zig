@@ -72,6 +72,7 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
                 var contexts_bytes = [_]u8{0} ** blockx_length;
                 for (0..degree) |i| {
                     contexts_bytes[i * 16] = @intCast(i);
+                    contexts_bytes[i * 16 + 1] = @intCast(degree - 1);
                 }
                 break :ctx_v AesBlockX.fromBytes(&contexts_bytes);
             };
@@ -151,8 +152,8 @@ fn Aegis128X_(comptime degree: u7, comptime tag_bits: u9) type {
         fn finalize(self: *Self, ad_len: usize, msg_len: usize) [tag_length]u8 {
             var s = &self.s;
             var b: [blockx_length]u8 = undefined;
-            mem.writeIntLittle(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8);
-            mem.writeIntLittle(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8);
+            mem.writeInt(u64, b[0..8], @as(u64, @intCast(ad_len)) * 8, .little);
+            mem.writeInt(u64, b[8..16], @as(u64, @intCast(msg_len)) * 8, .little);
             for (1..degree) |i| {
                 @memcpy(b[i * 16 ..][0..16], b[0..16]);
             }
