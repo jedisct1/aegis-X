@@ -2,18 +2,11 @@
 
 - [AEGIS-128X and AEGIS-256X](#aegis-128x-and-aegis-256x)
 - [Specification and rationale](#specification-and-rationale)
+- [Implementations](#implementations)
 - [Benchmarks](#benchmarks)
-  - [Ryzen 7 7700](#ryzen-7-7700)
-    - [Encryption](#encryption)
-    - [Authentication (MAC)](#authentication-mac)
-    - [Intel i9-13900k (thanks to @watzon)](#intel-i9-13900k-thanks-to-watzon)
-  - [Zig CI server - Ryzen 9](#zig-ci-server---ryzen-9)
-    - [Encryption](#encryption-1)
-    - [Authentication (MAC)](#authentication-mac-1)
-  - [Scaleway EPYC 7543 instance](#scaleway-epyc-7543-instance)
-    - [Encryption](#encryption-2)
-    - [Authentication (MAC)](#authentication-mac-2)
-- [Other implementations](#other-implementations)
+    - [Encryption (16 KB)](#encryption-16-kb)
+    - [Authentication (64 KB)](#authentication-64-kb)
+    - [Mobile benchmarks](#mobile-benchmarks)
 
 AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the long pipelines and vectorized AES instructions present on recent CPUs.
 
