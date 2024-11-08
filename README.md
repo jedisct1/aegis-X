@@ -15,7 +15,7 @@
     - [Authentication (MAC)](#authentication-mac-2)
 - [Other implementations](#other-implementations)
 
-AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the vectorized AES instructions present on recent x86_64 CPUs.
+AEGIS-128X and AEGIS-256X are proposed variants of the high performance authenticated ciphers AEGIS-128L and AEGIS-256, designed to take advantage of the long pipelines and vectorized AES instructions present on recent CPUs.
 
 # Specification and rationale
 
